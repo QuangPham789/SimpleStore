@@ -9,10 +9,21 @@ type Accounts {
   password: Int!
 }
 
+type Product {
+	id:          ID!
+	code:        String!
+	name:        String!
+	description: String!
+	price: String!      
+}
+
+
 
 type Query {
   GetAllAccounts: [Accounts!]!
   GetAccountByID(id: Int!): Accounts!
+  GetAllProduct: [Product!]!
+  GetProductByCode(code: String!): Product!
 }
 
 input NewAccount {
@@ -26,7 +37,24 @@ input UpdateAccountModel {
   password: Int!
 }
 
+input NewProduct{
+  code: String!
+  name: String!
+  description: String!
+	price: String!   
+}
+
+input UpdateProductModel{
+  id: Int!
+  code: String!
+  name: String!
+  description: String!
+	price: String!   
+}
+
 type Mutation {
   createAccount(input: NewAccount!): Accounts!
   updateAccount(input: UpdateAccountModel!): Accounts!
+  createProduct(input: NewProduct!): Product!
+  updateProduct(input: UpdateProductModel!): Product!
 }

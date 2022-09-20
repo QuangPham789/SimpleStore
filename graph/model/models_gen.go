@@ -7,8 +7,23 @@ type NewAccount struct {
 	Password int    `json:"password"`
 }
 
+type NewProduct struct {
+	Code        string `json:"code"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Price       string `json:"price"`
+}
+
 type UpdateAccountModel struct {
 	ID       int    `json:"id"`
 	Username string `json:"username"`
 	Password int    `json:"password"`
+}
+
+type UpdateProductModel struct {
+	ID          int    `json:"id"`
+	Code        string `json:"code"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Price       string `json:"price"`
 }

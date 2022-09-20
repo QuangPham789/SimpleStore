@@ -81,3 +81,16 @@ func UpdateAccount(ctx context.Context, input input.UpdateAccountModel) (*models
 	return &accountResult, nil
 
 }
+
+func GetAllProduct(ctx context.Context) ([]*models.Product, error) {
+	var lstProductResult []*models.Product
+	err := dbmodels.NewQuery(
+		qm.Select("products.id as id", "products.code as code", "products.name as name", "products.description as description", "products.category as category", "products.price as price"),
+		qm.From(dbmodels.TableNames.Products),
+	).Bind(ctx, boil.GetDB(), &lstProductResult)
+
+	if err != nil {
+		log.Fatal("Get all products fail", err)
+	}
+	return lstProductResult, nil
+}

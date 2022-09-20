@@ -22,7 +22,7 @@ resolver:
   layout: follow-schema
   dir: services
   package: services
-  filename_template: "accounts.resolvers.go"
+  filename_template: "product.resolvers.go"
 
 # Optional: turn on use ` + "`" + `gqlgen:"fieldName"` + "`" + ` tags in your models
 # struct_tag: json
@@ -65,6 +65,12 @@ models:
 
   Accounts:
     model: graphdemo/models.Accounts
+    fields:
+      graph:
+        resolver: true
+  
+  Product:
+    model: graphdemo/models.Product
     fields:
       graph:
         resolver: true
