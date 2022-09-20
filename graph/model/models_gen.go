@@ -2,13 +2,13 @@
 
 package model
 
-type Accounts struct {
-	ID       int `json:"id"`
+type NewAccount struct {
 	Username string `json:"username"`
 	Password int    `json:"password"`
 }
 
-type NewAccount struct {
+type UpdateAccountModel struct {
+	ID       int    `json:"id"`
 	Username string `json:"username"`
 	Password int    `json:"password"`
 }

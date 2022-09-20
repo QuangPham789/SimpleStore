@@ -36,3 +36,15 @@ func RandomUsername() string {
 func RandomPassword() int64 {
 	return RandomInt(100000, 999999)
 }
+
+func RandomProductName() string {
+	return RandomString(8)
+}
+
+func RandomProductPrice() int64 {
+	return RandomInt(100000, 999999)
+}
+
+func RandomProductCode() string {
+	return RandomString(4)
+}

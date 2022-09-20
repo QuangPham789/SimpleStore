@@ -1,4 +1,4 @@
-package graph
+package services
 
 // This file will not be regenerated automatically.
 //

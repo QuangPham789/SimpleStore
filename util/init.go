@@ -3,6 +3,8 @@ package util
 import (
 	"database/sql"
 	"log"
+
+	"github.com/volatiletech/sqlboiler/v4/boil"
 )
 
 const (
@@ -16,5 +18,6 @@ func InitDB() *sql.DB {
 	if err != nil {
 		log.Fatalf("an error '%s' was not expected", err)
 	}
+	boil.SetDB(db)
 	return db
 }

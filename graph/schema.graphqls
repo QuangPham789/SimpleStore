@@ -20,6 +20,13 @@ input NewAccount {
   password: Int!
 }
 
+input UpdateAccountModel {
+  id: Int!
+  username: String!
+  password: Int!
+}
+
 type Mutation {
   createAccount(input: NewAccount!): Accounts!
+  updateAccount(input: UpdateAccountModel!): Accounts!
 }
