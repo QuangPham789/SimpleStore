@@ -1,4 +1,4 @@
-package models
+package entity
 
 type Product struct {
 	ID          int    `json:"id"`
@@ -6,4 +6,5 @@ type Product struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Price       string `json:"price"`
+	Category    string `json:"category"`
 }

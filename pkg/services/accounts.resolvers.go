@@ -5,16 +5,16 @@ package services
 
 import (
 	"context"
-	"graphdemo/graph/generated"
-	"graphdemo/graph/model"
-	"graphdemo/models"
-	"graphdemo/repositories"
+	"graphdemo/pkg/entity"
+	"graphdemo/pkg/graph/generated"
+	"graphdemo/pkg/graph/model"
+	"graphdemo/pkg/repositories"
 
 	_ "github.com/lib/pq"
 )
 
 // CreateAccount is the resolver for the createAccount field.
-func (r *mutationResolver) CreateAccount(ctx context.Context, input model.NewAccount) (*models.Accounts, error) {
+func (r *mutationResolver) CreateAccount(ctx context.Context, input model.NewAccount) (*entity.Accounts, error) {
 	accountResult, err := repositories.CreateAccount(ctx, input)
 	if err != nil {
 		return nil, err
@@ -23,7 +23,7 @@ func (r *mutationResolver) CreateAccount(ctx context.Context, input model.NewAcc
 }
 
 // UpdateAccount is the resolver for the updateAccount field.
-func (r *mutationResolver) UpdateAccount(ctx context.Context, input model.UpdateAccountModel) (*models.Accounts, error) {
+func (r *mutationResolver) UpdateAccount(ctx context.Context, input model.UpdateAccountModel) (*entity.Accounts, error) {
 	accountResult, err := repositories.UpdateAccount(ctx, input)
 	if err != nil {
 		return nil, err
@@ -32,7 +32,7 @@ func (r *mutationResolver) UpdateAccount(ctx context.Context, input model.Update
 }
 
 // GetAllAccounts is the resolver for the GetAllAccounts field.
-func (r *queryResolver) GetAllAccounts(ctx context.Context) ([]*models.Accounts, error) {
+func (r *queryResolver) GetAllAccounts(ctx context.Context) ([]*entity.Accounts, error) {
 	accountsFromDB, err := repositories.GetAllAccounts(ctx)
 	if err != nil {
 		return nil, err
@@ -42,7 +42,7 @@ func (r *queryResolver) GetAllAccounts(ctx context.Context) ([]*models.Accounts,
 }
 
 // GetAccountByID is the resolver for the GetAccountByID field.
-func (r *queryResolver) GetAccountByID(ctx context.Context, id int) (*models.Accounts, error) {
+func (r *queryResolver) GetAccountByID(ctx context.Context, id int) (*entity.Accounts, error) {
 	accountsFromDB, err := repositories.GetAccountByID(ctx, int64(id))
 	if err != nil {
 		return nil, err

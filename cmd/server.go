@@ -1,9 +1,9 @@
 package main
 
 import (
-	"graphdemo/graph/generated"
-	"graphdemo/services"
-	"graphdemo/util"
+	"graphdemo/pkg/graph/generated"
+	"graphdemo/pkg/services"
+	"graphdemo/pkg/util"
 	"log"
 	"net/http"
 	"os"

@@ -2,17 +2,17 @@ package repositories
 
 import (
 	"context"
-	dbmodels "graphdemo/db/models"
-	input "graphdemo/graph/model"
-	models "graphdemo/models"
+	dbmodels "graphdemo/pkg/db/models"
+	entity "graphdemo/pkg/entity"
+	input "graphdemo/pkg/graph/model"
 	"log"
 
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
-func GetAllAccounts(ctx context.Context) ([]*models.Accounts, error) {
-	var lstAccountResult []*models.Accounts
+func GetAllAccounts(ctx context.Context) ([]*entity.Accounts, error) {
+	var lstAccountResult []*entity.Accounts
 	err := dbmodels.NewQuery(
 		qm.Select("accounts.id as id", "accounts.username as username", "accounts.password as password", "accounts.created_at as created_at"),
 		qm.From(dbmodels.TableNames.Accounts),
@@ -24,8 +24,8 @@ func GetAllAccounts(ctx context.Context) ([]*models.Accounts, error) {
 	return lstAccountResult, nil
 }
 
-func GetAccountByID(ctx context.Context, id int64) (*models.Accounts, error) {
-	var accountResult = models.Accounts{}
+func GetAccountByID(ctx context.Context, id int64) (*entity.Accounts, error) {
+	var accountResult = entity.Accounts{}
 
 	err := dbmodels.Accounts(qm.Where("id=?", id)).Bind(ctx, boil.GetDB(), &accountResult)
 
@@ -37,7 +37,7 @@ func GetAccountByID(ctx context.Context, id int64) (*models.Accounts, error) {
 
 }
 
-func CreateAccount(ctx context.Context, input input.NewAccount) (*models.Accounts, error) {
+func CreateAccount(ctx context.Context, input input.NewAccount) (*entity.Accounts, error) {
 	var account = dbmodels.Account{
 		Username: input.Username,
 		Password: int64(input.Password),
@@ -48,7 +48,7 @@ func CreateAccount(ctx context.Context, input input.NewAccount) (*models.Account
 		log.Fatal("Insert account fail", err)
 	}
 
-	accountResult := models.Accounts{
+	accountResult := entity.Accounts{
 		ID:       int(account.ID),
 		Username: account.Username,
 		Password: int(account.Password),
@@ -58,7 +58,7 @@ func CreateAccount(ctx context.Context, input input.NewAccount) (*models.Account
 
 }
 
-func UpdateAccount(ctx context.Context, input input.UpdateAccountModel) (*models.Accounts, error) {
+func UpdateAccount(ctx context.Context, input input.UpdateAccountModel) (*entity.Accounts, error) {
 	accountUpdate, err := dbmodels.FindAccount(ctx, boil.GetContextDB(), int64(input.ID))
 
 	if err != nil {
@@ -70,27 +70,14 @@ func UpdateAccount(ctx context.Context, input input.UpdateAccountModel) (*models
 
 	rows, err := accountUpdate.Update(ctx, boil.GetContextDB(), boil.Infer())
 
-	var accountResult models.Accounts
+	var accountResult entity.Accounts
 
 	if rows > 0 {
-		accountResult = models.Accounts{
+		accountResult = entity.Accounts{
 			Username: accountUpdate.Username,
 			Password: int(accountUpdate.Password),
 		}
 	}
 	return &accountResult, nil
 
-}
-
-func GetAllProduct(ctx context.Context) ([]*models.Product, error) {
-	var lstProductResult []*models.Product
-	err := dbmodels.NewQuery(
-		qm.Select("products.id as id", "products.code as code", "products.name as name", "products.description as description", "products.category as category", "products.price as price"),
-		qm.From(dbmodels.TableNames.Products),
-	).Bind(ctx, boil.GetDB(), &lstProductResult)
-
-	if err != nil {
-		log.Fatal("Get all products fail", err)
-	}
-	return lstProductResult, nil
 }

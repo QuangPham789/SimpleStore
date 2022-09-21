@@ -5,10 +5,14 @@ package dbmodels
 
 var TableNames = struct {
 	Accounts         string
+	Item             string
+	Order            string
 	Products         string
 	SchemaMigrations string
 }{
 	Accounts:         "accounts",
+	Item:             "item",
+	Order:            "order",
 	Products:         "products",
 	SchemaMigrations: "schema_migrations",
 }

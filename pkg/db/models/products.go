@@ -29,7 +29,7 @@ type Product struct {
 	Name        string      `boil:"name" json:"name" toml:"name" yaml:"name"`
 	Description string `boil:"description" json:"description,omitempty" toml:"description" yaml:"description,omitempty"`
 	Category    string `boil:"category" json:"category,omitempty" toml:"category" yaml:"category,omitempty"`
-	Price       int64       `boil:"price" json:"price" toml:"price" yaml:"price"`
+	Price       string      `boil:"price" json:"price" toml:"price" yaml:"price"`
 	CreatedAt   time.Time   `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 
 	R *productR `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -118,7 +118,7 @@ var ProductWhere = struct {
 	Name        whereHelperstring
 	Description whereHelpernull_String
 	Category    whereHelpernull_String
-	Price       whereHelperint64
+	Price       whereHelperstring
 	CreatedAt   whereHelpertime_Time
 }{
 	ID:          whereHelperint64{field: "\"products\".\"id\""},
@@ -126,7 +126,7 @@ var ProductWhere = struct {
 	Name:        whereHelperstring{field: "\"products\".\"name\""},
 	Description: whereHelpernull_String{field: "\"products\".\"description\""},
 	Category:    whereHelpernull_String{field: "\"products\".\"category\""},
-	Price:       whereHelperint64{field: "\"products\".\"price\""},
+	Price:       whereHelperstring{field: "\"products\".\"price\""},
 	CreatedAt:   whereHelpertime_Time{field: "\"products\".\"created_at\""},
 }
 

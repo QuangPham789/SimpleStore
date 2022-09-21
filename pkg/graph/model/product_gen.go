@@ -2,22 +2,12 @@
 
 package model
 
-type NewAccount struct {
-	Username string `json:"username"`
-	Password int    `json:"password"`
-}
-
 type NewProduct struct {
 	Code        string `json:"code"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Price       string `json:"price"`
-}
-
-type UpdateAccountModel struct {
-	ID       int    `json:"id"`
-	Username string `json:"username"`
-	Password int    `json:"password"`
+	Category    string `json:"category"`
 }
 
 type UpdateProductModel struct {
@@ -26,4 +16,5 @@ type UpdateProductModel struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Price       string `json:"price"`
+	Category    string `json:"category"`
 }

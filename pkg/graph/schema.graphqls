@@ -42,6 +42,7 @@ input NewProduct{
   name: String!
   description: String!
 	price: String!   
+  category: String!
 }
 
 input UpdateProductModel{
@@ -50,6 +51,7 @@ input UpdateProductModel{
   name: String!
   description: String!
 	price: String!   
+  category: String!
 }
 
 type Mutation {

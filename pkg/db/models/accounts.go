@@ -139,15 +139,26 @@ var AccountWhere = struct {
 
 // AccountRels is where relationship names are stored.
 var AccountRels = struct {
-}{}
+	IDOrder string
+}{
+	IDOrder: "IDOrder",
+}
 
 // accountR is where relationships are stored.
 type accountR struct {
+	IDOrder *Order `boil:"IDOrder" json:"IDOrder" toml:"IDOrder" yaml:"IDOrder"`
 }
 
 // NewStruct creates a new relationship struct
 func (*accountR) NewStruct() *accountR {
 	return &accountR{}
+}
+
+func (r *accountR) GetIDOrder() *Order {
+	if r == nil {
+		return nil
+	}
+	return r.IDOrder
 }
 
 // accountL is where Load methods for each relationship are stored.
@@ -457,6 +468,192 @@ func (q accountQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bo
 	}
 
 	return count > 0, nil
+}
+
+// IDOrder pointed to by the foreign key.
+func (o *Account) IDOrder(mods ...qm.QueryMod) orderQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"id\" = ?", o.ID),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	return Orders(queryMods...)
+}
+
+// LoadIDOrder allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-1 relationship.
+func (accountL) LoadIDOrder(ctx context.Context, e boil.ContextExecutor, singular bool, maybeAccount interface{}, mods queries.Applicator) error {
+	var slice []*Account
+	var object *Account
+
+	if singular {
+		var ok bool
+		object, ok = maybeAccount.(*Account)
+		if !ok {
+			object = new(Account)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeAccount)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeAccount))
+			}
+		}
+	} else {
+		s, ok := maybeAccount.(*[]*Account)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeAccount)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeAccount))
+			}
+		}
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &accountR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &accountR{}
+			}
+
+			for _, a := range args {
+				if a == obj.ID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`order`),
+		qm.WhereIn(`order.id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load Order")
+	}
+
+	var resultSlice []*Order
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice Order")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for order")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for order")
+	}
+
+	if len(accountAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.IDOrder = foreign
+		if foreign.R == nil {
+			foreign.R = &orderR{}
+		}
+		foreign.R.IDAccount = object
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if local.ID == foreign.ID {
+				local.R.IDOrder = foreign
+				if foreign.R == nil {
+					foreign.R = &orderR{}
+				}
+				foreign.R.IDAccount = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// SetIDOrderG of the account to the related item.
+// Sets o.R.IDOrder to related.
+// Adds o to related.R.IDAccount.
+// Uses the global database handle.
+func (o *Account) SetIDOrderG(ctx context.Context, insert bool, related *Order) error {
+	return o.SetIDOrder(ctx, boil.GetContextDB(), insert, related)
+}
+
+// SetIDOrder of the account to the related item.
+// Sets o.R.IDOrder to related.
+// Adds o to related.R.IDAccount.
+func (o *Account) SetIDOrder(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Order) error {
+	var err error
+
+	if insert {
+		related.ID = o.ID
+
+		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	} else {
+		updateQuery := fmt.Sprintf(
+			"UPDATE \"order\" SET %s WHERE %s",
+			strmangle.SetParamNames("\"", "\"", 1, []string{"id"}),
+			strmangle.WhereClause("\"", "\"", 2, orderPrimaryKeyColumns),
+		)
+		values := []interface{}{o.ID, related.ID}
+
+		if boil.IsDebug(ctx) {
+			writer := boil.DebugWriterFrom(ctx)
+			fmt.Fprintln(writer, updateQuery)
+			fmt.Fprintln(writer, values)
+		}
+		if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+			return errors.Wrap(err, "failed to update foreign table")
+		}
+
+		related.ID = o.ID
+	}
+
+	if o.R == nil {
+		o.R = &accountR{
+			IDOrder: related,
+		}
+	} else {
+		o.R.IDOrder = related
+	}
+
+	if related.R == nil {
+		related.R = &orderR{
+			IDAccount: o,
+		}
+	} else {
+		related.R.IDAccount = o
+	}
+	return nil
 }
 
 // Accounts retrieves all the records using an executor.

@@ -1,10 +1,10 @@
 # Where are all the schema files located? globs are supported eg  src/**/*.graphqls
 schema:
-  - graph/*.graphqls
-
+  - pkg/graph/*.graphqls
+# - ../graph/schema/account_schema.graphqls
 # Where should the generated server code go?
 exec:
-  filename: graph/generated/generated.go
+  filename: pkg/graph/generated/generated.go
   package: generated
 
 # Uncomment to enable federation
@@ -14,15 +14,15 @@ exec:
 
 # Where should any generated models go?
 model:
-  filename: graph/model/models_gen.go
+  filename: pkg/graph/model/account_gen.go
   package: model
 
 # Where should the resolver implementations go?
 resolver:
   layout: follow-schema
-  dir: services
+  dir: pkg/services
   package: services
-  filename_template: "product.resolvers.go"
+  filename_template: "accounts.resolvers.go"
 
 # Optional: turn on use ` + "`" + `gqlgen:"fieldName"` + "`" + ` tags in your models
 # struct_tag: json
@@ -64,13 +64,13 @@ models:
       - github.com/99designs/gqlgen/graphql.Int32
 
   Accounts:
-    model: graphdemo/models.Accounts
+    model: graphdemo/pkg/entity.Accounts
     fields:
       graph:
         resolver: true
   
   Product:
-    model: graphdemo/models.Product
+    model: graphdemo/pkg/entity.Product
     fields:
       graph:
         resolver: true

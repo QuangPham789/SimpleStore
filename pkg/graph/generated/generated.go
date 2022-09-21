@@ -7,8 +7,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"graphdemo/graph/model"
-	"graphdemo/models"
+	"graphdemo/pkg/entity"
+	"graphdemo/pkg/graph/model"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -75,16 +75,16 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	CreateAccount(ctx context.Context, input model.NewAccount) (*models.Accounts, error)
-	UpdateAccount(ctx context.Context, input model.UpdateAccountModel) (*models.Accounts, error)
-	CreateProduct(ctx context.Context, input model.NewProduct) (*models.Product, error)
-	UpdateProduct(ctx context.Context, input model.UpdateProductModel) (*models.Product, error)
+	CreateAccount(ctx context.Context, input model.NewAccount) (*entity.Accounts, error)
+	UpdateAccount(ctx context.Context, input model.UpdateAccountModel) (*entity.Accounts, error)
+	CreateProduct(ctx context.Context, input model.NewProduct) (*entity.Product, error)
+	UpdateProduct(ctx context.Context, input model.UpdateProductModel) (*entity.Product, error)
 }
 type QueryResolver interface {
-	GetAllAccounts(ctx context.Context) ([]*models.Accounts, error)
-	GetAccountByID(ctx context.Context, id int) (*models.Accounts, error)
-	GetAllProduct(ctx context.Context) ([]*models.Product, error)
-	GetProductByCode(ctx context.Context, code string) (*models.Product, error)
+	GetAllAccounts(ctx context.Context) ([]*entity.Accounts, error)
+	GetAccountByID(ctx context.Context, id int) (*entity.Accounts, error)
+	GetAllProduct(ctx context.Context) ([]*entity.Product, error)
+	GetProductByCode(ctx context.Context, code string) (*entity.Product, error)
 }
 
 type executableSchema struct {
@@ -360,6 +360,7 @@ input NewProduct{
   name: String!
   description: String!
 	price: String!   
+  category: String!
 }
 
 input UpdateProductModel{
@@ -368,6 +369,7 @@ input UpdateProductModel{
   name: String!
   description: String!
 	price: String!   
+  category: String!
 }
 
 type Mutation {
@@ -390,7 +392,7 @@ func (ec *executionContext) field_Mutation_createAccount_args(ctx context.Contex
 	var arg0 model.NewAccount
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNNewAccount2graphdemoᚋgraphᚋmodelᚐNewAccount(ctx, tmp)
+		arg0, err = ec.unmarshalNNewAccount2graphdemoᚋpkgᚋgraphᚋmodelᚐNewAccount(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -405,7 +407,7 @@ func (ec *executionContext) field_Mutation_createProduct_args(ctx context.Contex
 	var arg0 model.NewProduct
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNNewProduct2graphdemoᚋgraphᚋmodelᚐNewProduct(ctx, tmp)
+		arg0, err = ec.unmarshalNNewProduct2graphdemoᚋpkgᚋgraphᚋmodelᚐNewProduct(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -420,7 +422,7 @@ func (ec *executionContext) field_Mutation_updateAccount_args(ctx context.Contex
 	var arg0 model.UpdateAccountModel
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNUpdateAccountModel2graphdemoᚋgraphᚋmodelᚐUpdateAccountModel(ctx, tmp)
+		arg0, err = ec.unmarshalNUpdateAccountModel2graphdemoᚋpkgᚋgraphᚋmodelᚐUpdateAccountModel(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -435,7 +437,7 @@ func (ec *executionContext) field_Mutation_updateProduct_args(ctx context.Contex
 	var arg0 model.UpdateProductModel
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNUpdateProductModel2graphdemoᚋgraphᚋmodelᚐUpdateProductModel(ctx, tmp)
+		arg0, err = ec.unmarshalNUpdateProductModel2graphdemoᚋpkgᚋgraphᚋmodelᚐUpdateProductModel(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -527,7 +529,7 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _Accounts_id(ctx context.Context, field graphql.CollectedField, obj *models.Accounts) (ret graphql.Marshaler) {
+func (ec *executionContext) _Accounts_id(ctx context.Context, field graphql.CollectedField, obj *entity.Accounts) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Accounts_id(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -571,7 +573,7 @@ func (ec *executionContext) fieldContext_Accounts_id(ctx context.Context, field 
 	return fc, nil
 }
 
-func (ec *executionContext) _Accounts_username(ctx context.Context, field graphql.CollectedField, obj *models.Accounts) (ret graphql.Marshaler) {
+func (ec *executionContext) _Accounts_username(ctx context.Context, field graphql.CollectedField, obj *entity.Accounts) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Accounts_username(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -615,7 +617,7 @@ func (ec *executionContext) fieldContext_Accounts_username(ctx context.Context, 
 	return fc, nil
 }
 
-func (ec *executionContext) _Accounts_password(ctx context.Context, field graphql.CollectedField, obj *models.Accounts) (ret graphql.Marshaler) {
+func (ec *executionContext) _Accounts_password(ctx context.Context, field graphql.CollectedField, obj *entity.Accounts) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Accounts_password(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -685,9 +687,9 @@ func (ec *executionContext) _Mutation_createAccount(ctx context.Context, field g
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*models.Accounts)
+	res := resTmp.(*entity.Accounts)
 	fc.Result = res
-	return ec.marshalNAccounts2ᚖgraphdemoᚋmodelsᚐAccounts(ctx, field.Selections, res)
+	return ec.marshalNAccounts2ᚖgraphdemoᚋpkgᚋentityᚐAccounts(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createAccount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -748,9 +750,9 @@ func (ec *executionContext) _Mutation_updateAccount(ctx context.Context, field g
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*models.Accounts)
+	res := resTmp.(*entity.Accounts)
 	fc.Result = res
-	return ec.marshalNAccounts2ᚖgraphdemoᚋmodelsᚐAccounts(ctx, field.Selections, res)
+	return ec.marshalNAccounts2ᚖgraphdemoᚋpkgᚋentityᚐAccounts(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_updateAccount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -811,9 +813,9 @@ func (ec *executionContext) _Mutation_createProduct(ctx context.Context, field g
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*models.Product)
+	res := resTmp.(*entity.Product)
 	fc.Result = res
-	return ec.marshalNProduct2ᚖgraphdemoᚋmodelsᚐProduct(ctx, field.Selections, res)
+	return ec.marshalNProduct2ᚖgraphdemoᚋpkgᚋentityᚐProduct(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createProduct(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -878,9 +880,9 @@ func (ec *executionContext) _Mutation_updateProduct(ctx context.Context, field g
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*models.Product)
+	res := resTmp.(*entity.Product)
 	fc.Result = res
-	return ec.marshalNProduct2ᚖgraphdemoᚋmodelsᚐProduct(ctx, field.Selections, res)
+	return ec.marshalNProduct2ᚖgraphdemoᚋpkgᚋentityᚐProduct(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_updateProduct(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -919,7 +921,7 @@ func (ec *executionContext) fieldContext_Mutation_updateProduct(ctx context.Cont
 	return fc, nil
 }
 
-func (ec *executionContext) _Product_id(ctx context.Context, field graphql.CollectedField, obj *models.Product) (ret graphql.Marshaler) {
+func (ec *executionContext) _Product_id(ctx context.Context, field graphql.CollectedField, obj *entity.Product) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Product_id(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -963,7 +965,7 @@ func (ec *executionContext) fieldContext_Product_id(ctx context.Context, field g
 	return fc, nil
 }
 
-func (ec *executionContext) _Product_code(ctx context.Context, field graphql.CollectedField, obj *models.Product) (ret graphql.Marshaler) {
+func (ec *executionContext) _Product_code(ctx context.Context, field graphql.CollectedField, obj *entity.Product) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Product_code(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -1007,7 +1009,7 @@ func (ec *executionContext) fieldContext_Product_code(ctx context.Context, field
 	return fc, nil
 }
 
-func (ec *executionContext) _Product_name(ctx context.Context, field graphql.CollectedField, obj *models.Product) (ret graphql.Marshaler) {
+func (ec *executionContext) _Product_name(ctx context.Context, field graphql.CollectedField, obj *entity.Product) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Product_name(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -1051,7 +1053,7 @@ func (ec *executionContext) fieldContext_Product_name(ctx context.Context, field
 	return fc, nil
 }
 
-func (ec *executionContext) _Product_description(ctx context.Context, field graphql.CollectedField, obj *models.Product) (ret graphql.Marshaler) {
+func (ec *executionContext) _Product_description(ctx context.Context, field graphql.CollectedField, obj *entity.Product) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Product_description(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -1095,7 +1097,7 @@ func (ec *executionContext) fieldContext_Product_description(ctx context.Context
 	return fc, nil
 }
 
-func (ec *executionContext) _Product_price(ctx context.Context, field graphql.CollectedField, obj *models.Product) (ret graphql.Marshaler) {
+func (ec *executionContext) _Product_price(ctx context.Context, field graphql.CollectedField, obj *entity.Product) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Product_price(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -1165,9 +1167,9 @@ func (ec *executionContext) _Query_GetAllAccounts(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*models.Accounts)
+	res := resTmp.([]*entity.Accounts)
 	fc.Result = res
-	return ec.marshalNAccounts2ᚕᚖgraphdemoᚋmodelsᚐAccountsᚄ(ctx, field.Selections, res)
+	return ec.marshalNAccounts2ᚕᚖgraphdemoᚋpkgᚋentityᚐAccountsᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_GetAllAccounts(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1217,9 +1219,9 @@ func (ec *executionContext) _Query_GetAccountByID(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*models.Accounts)
+	res := resTmp.(*entity.Accounts)
 	fc.Result = res
-	return ec.marshalNAccounts2ᚖgraphdemoᚋmodelsᚐAccounts(ctx, field.Selections, res)
+	return ec.marshalNAccounts2ᚖgraphdemoᚋpkgᚋentityᚐAccounts(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_GetAccountByID(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1280,9 +1282,9 @@ func (ec *executionContext) _Query_GetAllProduct(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*models.Product)
+	res := resTmp.([]*entity.Product)
 	fc.Result = res
-	return ec.marshalNProduct2ᚕᚖgraphdemoᚋmodelsᚐProductᚄ(ctx, field.Selections, res)
+	return ec.marshalNProduct2ᚕᚖgraphdemoᚋpkgᚋentityᚐProductᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_GetAllProduct(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1336,9 +1338,9 @@ func (ec *executionContext) _Query_GetProductByCode(ctx context.Context, field g
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*models.Product)
+	res := resTmp.(*entity.Product)
 	fc.Result = res
-	return ec.marshalNProduct2ᚖgraphdemoᚋmodelsᚐProduct(ctx, field.Selections, res)
+	return ec.marshalNProduct2ᚖgraphdemoᚋpkgᚋentityᚐProduct(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_GetProductByCode(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3322,7 +3324,7 @@ func (ec *executionContext) unmarshalInputNewProduct(ctx context.Context, obj in
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"code", "name", "description", "price"}
+	fieldsInOrder := [...]string{"code", "name", "description", "price", "category"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -3358,6 +3360,14 @@ func (ec *executionContext) unmarshalInputNewProduct(ctx context.Context, obj in
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("price"))
 			it.Price, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "category":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("category"))
+			it.Category, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3418,7 +3428,7 @@ func (ec *executionContext) unmarshalInputUpdateProductModel(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "code", "name", "description", "price"}
+	fieldsInOrder := [...]string{"id", "code", "name", "description", "price", "category"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -3465,6 +3475,14 @@ func (ec *executionContext) unmarshalInputUpdateProductModel(ctx context.Context
 			if err != nil {
 				return it, err
 			}
+		case "category":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("category"))
+			it.Category, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -3481,7 +3499,7 @@ func (ec *executionContext) unmarshalInputUpdateProductModel(ctx context.Context
 
 var accountsImplementors = []string{"Accounts"}
 
-func (ec *executionContext) _Accounts(ctx context.Context, sel ast.SelectionSet, obj *models.Accounts) graphql.Marshaler {
+func (ec *executionContext) _Accounts(ctx context.Context, sel ast.SelectionSet, obj *entity.Accounts) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, accountsImplementors)
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
@@ -3589,7 +3607,7 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 var productImplementors = []string{"Product"}
 
-func (ec *executionContext) _Product(ctx context.Context, sel ast.SelectionSet, obj *models.Product) graphql.Marshaler {
+func (ec *executionContext) _Product(ctx context.Context, sel ast.SelectionSet, obj *entity.Product) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, productImplementors)
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
@@ -4095,11 +4113,11 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNAccounts2graphdemoᚋmodelsᚐAccounts(ctx context.Context, sel ast.SelectionSet, v models.Accounts) graphql.Marshaler {
+func (ec *executionContext) marshalNAccounts2graphdemoᚋpkgᚋentityᚐAccounts(ctx context.Context, sel ast.SelectionSet, v entity.Accounts) graphql.Marshaler {
 	return ec._Accounts(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNAccounts2ᚕᚖgraphdemoᚋmodelsᚐAccountsᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.Accounts) graphql.Marshaler {
+func (ec *executionContext) marshalNAccounts2ᚕᚖgraphdemoᚋpkgᚋentityᚐAccountsᚄ(ctx context.Context, sel ast.SelectionSet, v []*entity.Accounts) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4123,7 +4141,7 @@ func (ec *executionContext) marshalNAccounts2ᚕᚖgraphdemoᚋmodelsᚐAccounts
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNAccounts2ᚖgraphdemoᚋmodelsᚐAccounts(ctx, sel, v[i])
+			ret[i] = ec.marshalNAccounts2ᚖgraphdemoᚋpkgᚋentityᚐAccounts(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -4143,7 +4161,7 @@ func (ec *executionContext) marshalNAccounts2ᚕᚖgraphdemoᚋmodelsᚐAccounts
 	return ret
 }
 
-func (ec *executionContext) marshalNAccounts2ᚖgraphdemoᚋmodelsᚐAccounts(ctx context.Context, sel ast.SelectionSet, v *models.Accounts) graphql.Marshaler {
+func (ec *executionContext) marshalNAccounts2ᚖgraphdemoᚋpkgᚋentityᚐAccounts(ctx context.Context, sel ast.SelectionSet, v *entity.Accounts) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -4198,21 +4216,21 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) unmarshalNNewAccount2graphdemoᚋgraphᚋmodelᚐNewAccount(ctx context.Context, v interface{}) (model.NewAccount, error) {
+func (ec *executionContext) unmarshalNNewAccount2graphdemoᚋpkgᚋgraphᚋmodelᚐNewAccount(ctx context.Context, v interface{}) (model.NewAccount, error) {
 	res, err := ec.unmarshalInputNewAccount(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNNewProduct2graphdemoᚋgraphᚋmodelᚐNewProduct(ctx context.Context, v interface{}) (model.NewProduct, error) {
+func (ec *executionContext) unmarshalNNewProduct2graphdemoᚋpkgᚋgraphᚋmodelᚐNewProduct(ctx context.Context, v interface{}) (model.NewProduct, error) {
 	res, err := ec.unmarshalInputNewProduct(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNProduct2graphdemoᚋmodelsᚐProduct(ctx context.Context, sel ast.SelectionSet, v models.Product) graphql.Marshaler {
+func (ec *executionContext) marshalNProduct2graphdemoᚋpkgᚋentityᚐProduct(ctx context.Context, sel ast.SelectionSet, v entity.Product) graphql.Marshaler {
 	return ec._Product(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNProduct2ᚕᚖgraphdemoᚋmodelsᚐProductᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.Product) graphql.Marshaler {
+func (ec *executionContext) marshalNProduct2ᚕᚖgraphdemoᚋpkgᚋentityᚐProductᚄ(ctx context.Context, sel ast.SelectionSet, v []*entity.Product) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4236,7 +4254,7 @@ func (ec *executionContext) marshalNProduct2ᚕᚖgraphdemoᚋmodelsᚐProduct�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNProduct2ᚖgraphdemoᚋmodelsᚐProduct(ctx, sel, v[i])
+			ret[i] = ec.marshalNProduct2ᚖgraphdemoᚋpkgᚋentityᚐProduct(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -4256,7 +4274,7 @@ func (ec *executionContext) marshalNProduct2ᚕᚖgraphdemoᚋmodelsᚐProduct�
 	return ret
 }
 
-func (ec *executionContext) marshalNProduct2ᚖgraphdemoᚋmodelsᚐProduct(ctx context.Context, sel ast.SelectionSet, v *models.Product) graphql.Marshaler {
+func (ec *executionContext) marshalNProduct2ᚖgraphdemoᚋpkgᚋentityᚐProduct(ctx context.Context, sel ast.SelectionSet, v *entity.Product) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -4281,12 +4299,12 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) unmarshalNUpdateAccountModel2graphdemoᚋgraphᚋmodelᚐUpdateAccountModel(ctx context.Context, v interface{}) (model.UpdateAccountModel, error) {
+func (ec *executionContext) unmarshalNUpdateAccountModel2graphdemoᚋpkgᚋgraphᚋmodelᚐUpdateAccountModel(ctx context.Context, v interface{}) (model.UpdateAccountModel, error) {
 	res, err := ec.unmarshalInputUpdateAccountModel(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNUpdateProductModel2graphdemoᚋgraphᚋmodelᚐUpdateProductModel(ctx context.Context, v interface{}) (model.UpdateProductModel, error) {
+func (ec *executionContext) unmarshalNUpdateProductModel2graphdemoᚋpkgᚋgraphᚋmodelᚐUpdateProductModel(ctx context.Context, v interface{}) (model.UpdateProductModel, error) {
 	res, err := ec.unmarshalInputUpdateProductModel(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
