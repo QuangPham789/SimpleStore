@@ -14,9 +14,24 @@ type Product {
 	code:        String!
 	name:        String!
 	description: String!
-	price: String!      
+	price:       String!      
 }
 
+type Item {
+	id:         ID!
+	code:       String!
+  productid:  Int!
+	unit:       Int!
+	price:      String!      
+	total:      String!      
+}
+
+type Order {
+	id:         ID!
+  accountid: Int!     
+	items: [Item!]           
+	total: Int!            
+}
 
 
 type Query {
@@ -24,6 +39,11 @@ type Query {
   GetAccountByID(id: Int!): Accounts!
   GetAllProduct: [Product!]!
   GetProductByCode(code: String!): Product!
+
+  GetItemByOrderID: [Item!]
+  GetAllOrder: [Order!]
+  GetOrderByAccountId: Order!
+
 }
 
 input NewAccount {
@@ -54,9 +74,42 @@ input UpdateProductModel{
   category: String!
 }
 
+input NewItem{
+  code:       String!
+  productid:  Int!
+	unit:       Int!
+	price:      String!      
+	total:      String!      
+}
+
+input ItemModel{
+  id: Int!
+  code:       String!
+  productid:  Int!
+	unit:       Int!
+	price:      String!      
+	total:      String!      
+}
+
+input NewOrder{
+  accountid: Int!     
+	items: [ItemModel!]           
+	total: Int!       
+}
+
+input UpdateOrderModel{
+  id: Int!  
+	items: [ItemModel!]           
+	total: Int!         
+}
+
 type Mutation {
   createAccount(input: NewAccount!): Accounts!
   updateAccount(input: UpdateAccountModel!): Accounts!
   createProduct(input: NewProduct!): Product!
   updateProduct(input: UpdateProductModel!): Product!
+  createItem(input: NewItem!) : Item!
+  updateItem(input: ItemModel!) : Item!
+  createOrder(input: NewOrder!) : Order!
+  updateOrder(input: UpdateOrderModel!) : Order!
 }

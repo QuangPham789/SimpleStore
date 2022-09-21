@@ -14,7 +14,7 @@ exec:
 
 # Where should any generated models go?
 model:
-  filename: pkg/graph/model/account_gen.go
+  filename: pkg/graph/model/order_gen.go
   package: model
 
 # Where should the resolver implementations go?
@@ -22,7 +22,7 @@ resolver:
   layout: follow-schema
   dir: pkg/services
   package: services
-  filename_template: "accounts.resolvers.go"
+  filename_template: "order.resolvers.go"
 
 # Optional: turn on use ` + "`" + `gqlgen:"fieldName"` + "`" + ` tags in your models
 # struct_tag: json
@@ -71,6 +71,12 @@ models:
   
   Product:
     model: graphdemo/pkg/entity.Product
+    fields:
+      graph:
+        resolver: true
+  
+  Item:
+    model: graphdemo/pkg/entity.Item
     fields:
       graph:
         resolver: true
