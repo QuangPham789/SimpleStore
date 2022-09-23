@@ -78,6 +78,7 @@ type ComplexityRoot struct {
 	Order struct {
 		Accountid func(childComplexity int) int
 		ID        func(childComplexity int) int
+		Itemid    func(childComplexity int) int
 		Items     func(childComplexity int) int
 		Total     func(childComplexity int) int
 	}
@@ -112,9 +113,9 @@ type MutationResolver interface {
 	CreateItem(ctx context.Context, input model.NewItem) (*entity.Item, error)
 	UpdateItem(ctx context.Context, input model.ItemModel) (*entity.Item, error)
 	DeleteItem(ctx context.Context, id int) (*entity.Item, error)
-	CreateOrder(ctx context.Context, input model.NewOrder) (*model.Order, error)
-	UpdateOrder(ctx context.Context, input model.UpdateOrderModel) (*model.Order, error)
-	DeleteOrder(ctx context.Context, id int) (*model.Order, error)
+	CreateOrder(ctx context.Context, input model.NewOrder) (*entity.Order, error)
+	UpdateOrder(ctx context.Context, input model.UpdateOrderModel) (*entity.Order, error)
+	DeleteOrder(ctx context.Context, id int) (*entity.Order, error)
 }
 type QueryResolver interface {
 	GetAllAccounts(ctx context.Context) ([]*entity.Accounts, error)
@@ -123,8 +124,8 @@ type QueryResolver interface {
 	GetProductByCode(ctx context.Context, code string) (*entity.Product, error)
 	GetAllItem(ctx context.Context) ([]*entity.Item, error)
 	GetItemByOrderID(ctx context.Context, id int) ([]*entity.Item, error)
-	GetAllOrder(ctx context.Context) ([]*model.Order, error)
-	GetOrderByAccountID(ctx context.Context) (*model.Order, error)
+	GetAllOrder(ctx context.Context) ([]*entity.Order, error)
+	GetOrderByAccountID(ctx context.Context) (*entity.Order, error)
 }
 
 type executableSchema struct {
@@ -363,6 +364,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Order.ID(childComplexity), true
 
+	case "Order.itemid":
+		if e.complexity.Order.Itemid == nil {
+			break
+		}
+
+		return e.complexity.Order.Itemid(childComplexity), true
+
 	case "Order.items":
 		if e.complexity.Order.Items == nil {
 			break
@@ -589,7 +597,8 @@ type Item {
 
 type Order {
 	id:         ID!
-  accountid: Int!     
+  accountid: Int! 
+  itemid: Int!     
 	items: [Item!]           
 	total: Int!            
 }
@@ -1984,9 +1993,9 @@ func (ec *executionContext) _Mutation_createOrder(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Order)
+	res := resTmp.(*entity.Order)
 	fc.Result = res
-	return ec.marshalNOrder2ᚖgraphdemoᚋpkgᚋgraphᚋmodelᚐOrder(ctx, field.Selections, res)
+	return ec.marshalNOrder2ᚖgraphdemoᚋpkgᚋentityᚐOrder(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createOrder(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2001,6 +2010,8 @@ func (ec *executionContext) fieldContext_Mutation_createOrder(ctx context.Contex
 				return ec.fieldContext_Order_id(ctx, field)
 			case "accountid":
 				return ec.fieldContext_Order_accountid(ctx, field)
+			case "itemid":
+				return ec.fieldContext_Order_itemid(ctx, field)
 			case "items":
 				return ec.fieldContext_Order_items(ctx, field)
 			case "total":
@@ -2049,9 +2060,9 @@ func (ec *executionContext) _Mutation_updateOrder(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Order)
+	res := resTmp.(*entity.Order)
 	fc.Result = res
-	return ec.marshalNOrder2ᚖgraphdemoᚋpkgᚋgraphᚋmodelᚐOrder(ctx, field.Selections, res)
+	return ec.marshalNOrder2ᚖgraphdemoᚋpkgᚋentityᚐOrder(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_updateOrder(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2066,6 +2077,8 @@ func (ec *executionContext) fieldContext_Mutation_updateOrder(ctx context.Contex
 				return ec.fieldContext_Order_id(ctx, field)
 			case "accountid":
 				return ec.fieldContext_Order_accountid(ctx, field)
+			case "itemid":
+				return ec.fieldContext_Order_itemid(ctx, field)
 			case "items":
 				return ec.fieldContext_Order_items(ctx, field)
 			case "total":
@@ -2114,9 +2127,9 @@ func (ec *executionContext) _Mutation_deleteOrder(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Order)
+	res := resTmp.(*entity.Order)
 	fc.Result = res
-	return ec.marshalNOrder2ᚖgraphdemoᚋpkgᚋgraphᚋmodelᚐOrder(ctx, field.Selections, res)
+	return ec.marshalNOrder2ᚖgraphdemoᚋpkgᚋentityᚐOrder(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_deleteOrder(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2131,6 +2144,8 @@ func (ec *executionContext) fieldContext_Mutation_deleteOrder(ctx context.Contex
 				return ec.fieldContext_Order_id(ctx, field)
 			case "accountid":
 				return ec.fieldContext_Order_accountid(ctx, field)
+			case "itemid":
+				return ec.fieldContext_Order_itemid(ctx, field)
 			case "items":
 				return ec.fieldContext_Order_items(ctx, field)
 			case "total":
@@ -2153,7 +2168,7 @@ func (ec *executionContext) fieldContext_Mutation_deleteOrder(ctx context.Contex
 	return fc, nil
 }
 
-func (ec *executionContext) _Order_id(ctx context.Context, field graphql.CollectedField, obj *model.Order) (ret graphql.Marshaler) {
+func (ec *executionContext) _Order_id(ctx context.Context, field graphql.CollectedField, obj *entity.Order) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Order_id(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -2197,7 +2212,7 @@ func (ec *executionContext) fieldContext_Order_id(ctx context.Context, field gra
 	return fc, nil
 }
 
-func (ec *executionContext) _Order_accountid(ctx context.Context, field graphql.CollectedField, obj *model.Order) (ret graphql.Marshaler) {
+func (ec *executionContext) _Order_accountid(ctx context.Context, field graphql.CollectedField, obj *entity.Order) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Order_accountid(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -2241,7 +2256,51 @@ func (ec *executionContext) fieldContext_Order_accountid(ctx context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _Order_items(ctx context.Context, field graphql.CollectedField, obj *model.Order) (ret graphql.Marshaler) {
+func (ec *executionContext) _Order_itemid(ctx context.Context, field graphql.CollectedField, obj *entity.Order) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Order_itemid(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Itemid, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Order_itemid(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Order",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Order_items(ctx context.Context, field graphql.CollectedField, obj *entity.Order) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Order_items(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -2296,7 +2355,7 @@ func (ec *executionContext) fieldContext_Order_items(ctx context.Context, field 
 	return fc, nil
 }
 
-func (ec *executionContext) _Order_total(ctx context.Context, field graphql.CollectedField, obj *model.Order) (ret graphql.Marshaler) {
+func (ec *executionContext) _Order_total(ctx context.Context, field graphql.CollectedField, obj *entity.Order) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Order_total(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -2942,9 +3001,9 @@ func (ec *executionContext) _Query_GetAllOrder(ctx context.Context, field graphq
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*model.Order)
+	res := resTmp.([]*entity.Order)
 	fc.Result = res
-	return ec.marshalOOrder2ᚕᚖgraphdemoᚋpkgᚋgraphᚋmodelᚐOrderᚄ(ctx, field.Selections, res)
+	return ec.marshalOOrder2ᚕᚖgraphdemoᚋpkgᚋentityᚐOrderᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_GetAllOrder(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2959,6 +3018,8 @@ func (ec *executionContext) fieldContext_Query_GetAllOrder(ctx context.Context, 
 				return ec.fieldContext_Order_id(ctx, field)
 			case "accountid":
 				return ec.fieldContext_Order_accountid(ctx, field)
+			case "itemid":
+				return ec.fieldContext_Order_itemid(ctx, field)
 			case "items":
 				return ec.fieldContext_Order_items(ctx, field)
 			case "total":
@@ -2996,9 +3057,9 @@ func (ec *executionContext) _Query_GetOrderByAccountId(ctx context.Context, fiel
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Order)
+	res := resTmp.(*entity.Order)
 	fc.Result = res
-	return ec.marshalNOrder2ᚖgraphdemoᚋpkgᚋgraphᚋmodelᚐOrder(ctx, field.Selections, res)
+	return ec.marshalNOrder2ᚖgraphdemoᚋpkgᚋentityᚐOrder(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_GetOrderByAccountId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3013,6 +3074,8 @@ func (ec *executionContext) fieldContext_Query_GetOrderByAccountId(ctx context.C
 				return ec.fieldContext_Order_id(ctx, field)
 			case "accountid":
 				return ec.fieldContext_Order_accountid(ctx, field)
+			case "itemid":
+				return ec.fieldContext_Order_itemid(ctx, field)
 			case "items":
 				return ec.fieldContext_Order_items(ctx, field)
 			case "total":
@@ -5603,7 +5666,7 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 var orderImplementors = []string{"Order"}
 
-func (ec *executionContext) _Order(ctx context.Context, sel ast.SelectionSet, obj *model.Order) graphql.Marshaler {
+func (ec *executionContext) _Order(ctx context.Context, sel ast.SelectionSet, obj *entity.Order) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, orderImplementors)
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
@@ -5621,6 +5684,13 @@ func (ec *executionContext) _Order(ctx context.Context, sel ast.SelectionSet, ob
 		case "accountid":
 
 			out.Values[i] = ec._Order_accountid(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "itemid":
+
+			out.Values[i] = ec._Order_itemid(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -6400,11 +6470,11 @@ func (ec *executionContext) unmarshalNNewProduct2graphdemoᚋpkgᚋgraphᚋmodel
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNOrder2graphdemoᚋpkgᚋgraphᚋmodelᚐOrder(ctx context.Context, sel ast.SelectionSet, v model.Order) graphql.Marshaler {
+func (ec *executionContext) marshalNOrder2graphdemoᚋpkgᚋentityᚐOrder(ctx context.Context, sel ast.SelectionSet, v entity.Order) graphql.Marshaler {
 	return ec._Order(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNOrder2ᚖgraphdemoᚋpkgᚋgraphᚋmodelᚐOrder(ctx context.Context, sel ast.SelectionSet, v *model.Order) graphql.Marshaler {
+func (ec *executionContext) marshalNOrder2ᚖgraphdemoᚋpkgᚋentityᚐOrder(ctx context.Context, sel ast.SelectionSet, v *entity.Order) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -6848,7 +6918,7 @@ func (ec *executionContext) unmarshalOItemModel2ᚕᚖgraphdemoᚋpkgᚋgraphᚋ
 	return res, nil
 }
 
-func (ec *executionContext) marshalOOrder2ᚕᚖgraphdemoᚋpkgᚋgraphᚋmodelᚐOrderᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Order) graphql.Marshaler {
+func (ec *executionContext) marshalOOrder2ᚕᚖgraphdemoᚋpkgᚋentityᚐOrderᚄ(ctx context.Context, sel ast.SelectionSet, v []*entity.Order) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -6875,7 +6945,7 @@ func (ec *executionContext) marshalOOrder2ᚕᚖgraphdemoᚋpkgᚋgraphᚋmodel�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNOrder2ᚖgraphdemoᚋpkgᚋgraphᚋmodelᚐOrder(ctx, sel, v[i])
+			ret[i] = ec.marshalNOrder2ᚖgraphdemoᚋpkgᚋentityᚐOrder(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)

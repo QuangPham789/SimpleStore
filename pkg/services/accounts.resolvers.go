@@ -45,16 +45,20 @@ func (r *queryResolver) GetAllAccounts(ctx context.Context) ([]*entity.Accounts,
 	}
 
 	return accountsFromDB, nil
+
+	// return dataloader.GetAccountLoader(ctx).Load(input)
 }
 
 // GetAccountByID is the resolver for the GetAccountByID field.
 func (r *queryResolver) GetAccountByID(ctx context.Context, id int) (*entity.Accounts, error) {
-	accountsFromDB, err := repositories.GetAccountByID(ctx, int64(id))
-	if err != nil {
-		return nil, err
-	}
+	// accountsFromDB, err := repositories.GetAccountByID(ctx, int64(id))
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	return accountsFromDB, nil
+	// return accountsFromDB, nil
+	// return repositories.GetAccountLoader(ctx).Load(id)
+	panic(fmt.Errorf("not implemented: DeleteAccount - deleteAccount"))
 }
 
 // Mutation returns generated.MutationResolver implementation.

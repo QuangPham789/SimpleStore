@@ -24,16 +24,19 @@ func GetAllAccounts(ctx context.Context) ([]*entity.Accounts, error) {
 	return lstAccountResult, nil
 }
 
-func GetAccountByID(ctx context.Context, id int64) (*entity.Accounts, error) {
-	var accountResult = entity.Accounts{}
-
-	err := dbmodels.Accounts(qm.Where("id=?", id)).Bind(ctx, boil.GetDB(), &accountResult)
+func GetAccountByID(ctx context.Context, ids []int) ([]*entity.Accounts, error) {
+	var accountResult []*entity.Accounts
+	convertedIDs := make([]interface{}, len(ids))
+	for index, num := range ids {
+		convertedIDs[index] = num
+	}
+	err := dbmodels.Accounts(qm.WhereIn("id IN ?", convertedIDs...)).Bind(ctx, boil.GetDB(), &accountResult)
 
 	if err != nil {
 		log.Fatal("Get account by ID fail", err)
 	}
 
-	return &accountResult, nil
+	return accountResult, nil
 
 }
 

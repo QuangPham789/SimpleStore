@@ -88,15 +88,18 @@ func UpdateItem(ctx context.Context, input input.ItemModel) (*entity.Item, error
 
 }
 
-func GetItemByOrderID(ctx context.Context, code string) (*entity.Item, error) {
-	var itemResult = entity.Item{}
-
-	err := dbmodels.Items(qm.Where("code=?", code)).Bind(ctx, boil.GetDB(), &itemResult)
+func GetItemByOrderID(ctx context.Context, code []string) ([]*entity.Item, error) {
+	var itemResult []*entity.Item
+	convertedIDs := make([]interface{}, len(code))
+	for index, num := range code {
+		convertedIDs[index] = num
+	}
+	err := dbmodels.Items(qm.WhereIn("id IN ?", convertedIDs...)).Bind(ctx, boil.GetDB(), &itemResult)
 
 	if err != nil {
-		log.Fatal("Get item by code fail", err)
+		log.Fatal("Get item by id fail", err)
 	}
 
-	return &itemResult, nil
+	return itemResult, nil
 
 }

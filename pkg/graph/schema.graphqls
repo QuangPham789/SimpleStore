@@ -28,7 +28,8 @@ type Item {
 
 type Order {
 	id:         ID!
-  accountid: Int!     
+  accountid: Int! 
+  itemid: Int!     
 	items: [Item!]           
 	total: Int!            
 }

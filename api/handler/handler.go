@@ -1,10 +1,11 @@
 package handler
 
 import (
+	"context"
 	"graphdemo/pkg/graph/generated"
-	"net/http"
-
+	"graphdemo/pkg/repositories"
 	"graphdemo/pkg/services"
+	"net/http"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -14,8 +15,8 @@ import (
 // Routes initialize the handlers for the router
 func Routes() *chi.Mux {
 	router := chi.NewRouter()
-
-	router.Post("/query", graphQLHandler())
+	queryHandler := graphQLHandler()
+	router.Post("/query", repositories.DataloaderMiddleware(context.Background(), queryHandler))
 
 	router.Get("/playground", playgroundQLHandler("/v1/query"))
 
@@ -23,6 +24,7 @@ func Routes() *chi.Mux {
 }
 
 func graphQLHandler() http.HandlerFunc {
+
 	h := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &services.Resolver{}}))
 
 	return h.ServeHTTP

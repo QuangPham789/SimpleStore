@@ -74,7 +74,11 @@ models:
     fields:
       graph:
         resolver: true
-  
+  Order:
+    model: graphdemo/pkg/entity.Order
+    fields:
+      graph:
+        resolver: true
   Item:
     model: graphdemo/pkg/entity.Item
     fields:
