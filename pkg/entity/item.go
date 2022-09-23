@@ -1,7 +1,7 @@
 package entity
 
 type Item struct {
-	ID        string `json:"id"`
+	ID        int    `json:"id"`
 	Code      string `json:"code"`
 	Productid int    `json:"productid"`
 	Unit      int    `json:"unit"`

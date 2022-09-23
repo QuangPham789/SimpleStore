@@ -90,13 +90,16 @@ var OrderWhere = struct {
 // OrderRels is where relationship names are stored.
 var OrderRels = struct {
 	IDAccount string
+	ItemID string
 }{
 	IDAccount: "IDAccount",
+	ItemID: "ItemID",
 }
 
 // orderR is where relationships are stored.
 type orderR struct {
 	IDAccount *Account `boil:"IDAccount" json:"IDAccount" toml:"IDAccount" yaml:"IDAccount"`
+	ItemID *Item `boil:"ItemID" json:"ItemID" toml:"ItemID" yaml:"ItemID"`
 }
 
 // NewStruct creates a new relationship struct

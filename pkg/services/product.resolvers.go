@@ -5,7 +5,6 @@ package services
 
 import (
 	"context"
-	"fmt"
 	"graphdemo/pkg/entity"
 	"graphdemo/pkg/graph/model"
 	"graphdemo/pkg/repositories"
@@ -29,6 +28,15 @@ func (r *mutationResolver) UpdateProduct(ctx context.Context, input model.Update
 	return productResult, nil
 }
 
+// DeleteProduct is the resolver for the deleteProduct field.
+func (r *mutationResolver) DeleteProduct(ctx context.Context, id int) (*entity.Product, error) {
+	productResult, err := repositories.DeleteProduct(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return productResult, nil
+}
+
 // GetAllProduct is the resolver for the GetAllProduct field.
 func (r *queryResolver) GetAllProduct(ctx context.Context) ([]*entity.Product, error) {
 	productFromDB, err := repositories.GetAllProduct(ctx)
@@ -41,7 +49,21 @@ func (r *queryResolver) GetAllProduct(ctx context.Context) ([]*entity.Product, e
 
 // GetProductByCode is the resolver for the GetProductByCode field.
 func (r *queryResolver) GetProductByCode(ctx context.Context, code string) (*entity.Product, error) {
-	panic(fmt.Errorf("not implemented: GetProductByCode - GetProductByCode"))
+	productFromDB, err := repositories.GetProductByCode(ctx, code)
+	if err != nil {
+		return nil, err
+	}
+
+	return productFromDB, nil
+	// product := entity.Product{
+	// 	ID:          1,
+	// 	Code:        "123",
+	// 	Name:        "demo",
+	// 	Description: "demo",
+	// 	Price:       "1000",
+	// 	Category:    "demo",
+	// }
+	// return &product, nil
 }
 
 type newProductResolver struct{ *Resolver }

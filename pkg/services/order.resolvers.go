@@ -19,6 +19,11 @@ func (r *mutationResolver) UpdateOrder(ctx context.Context, input model.UpdateOr
 	panic(fmt.Errorf("not implemented: UpdateOrder - updateOrder"))
 }
 
+// DeleteOrder is the resolver for the deleteOrder field.
+func (r *mutationResolver) DeleteOrder(ctx context.Context, id int) (*model.Order, error) {
+	panic(fmt.Errorf("not implemented: DeleteOrder - deleteOrder"))
+}
+
 // GetAllOrder is the resolver for the GetAllOrder field.
 func (r *queryResolver) GetAllOrder(ctx context.Context) ([]*model.Order, error) {
 	panic(fmt.Errorf("not implemented: GetAllOrder - GetAllOrder"))

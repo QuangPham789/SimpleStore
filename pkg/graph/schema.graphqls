@@ -40,7 +40,8 @@ type Query {
   GetAllProduct: [Product!]!
   GetProductByCode(code: String!): Product!
 
-  GetItemByOrderID: [Item!]
+  GetAllItem: [Item!]
+  GetItemByOrderID(id: Int!):[Item!]
   GetAllOrder: [Order!]
   GetOrderByAccountId: Order!
 
@@ -106,10 +107,14 @@ input UpdateOrderModel{
 type Mutation {
   createAccount(input: NewAccount!): Accounts!
   updateAccount(input: UpdateAccountModel!): Accounts!
+  deleteAccount(id: Int!): Accounts!
   createProduct(input: NewProduct!): Product!
   updateProduct(input: UpdateProductModel!): Product!
+  deleteProduct(id: Int!): Product!
   createItem(input: NewItem!) : Item!
   updateItem(input: ItemModel!) : Item!
+  deleteItem(id: Int!): Item!
   createOrder(input: NewOrder!) : Order!
   updateOrder(input: UpdateOrderModel!) : Order!
+  deleteOrder(id: Int!): Order!
 }

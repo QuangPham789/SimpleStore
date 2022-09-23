@@ -14,14 +14,12 @@ type NewOrder struct {
 	Total     int          `json:"total"`
 }
 
-
 type Order struct {
 	ID        string         `json:"id"`
 	Accountid int            `json:"accountid"`
 	Items     []*entity.Item `json:"items"`
 	Total     int            `json:"total"`
 }
-
 
 type UpdateOrderModel struct {
 	ID    int          `json:"id"`

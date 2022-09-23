@@ -6,10 +6,78 @@ import (
 	entity "graphdemo/pkg/entity"
 	input "graphdemo/pkg/graph/model"
 	"log"
+	"os"
 
+	// "github.com/graph-gophers/dataloader"
+	// "github.com/graph-gophers/dataloader"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
+
+type ctxKey string
+
+const (
+	loadersKey = ctxKey("dataloaders")
+)
+
+// UserReader reads Users from a database
+// type ProductReader struct {
+// 	conn *sql.DB
+// }
+
+// // dataloader
+// func GetProducts(ctx context.Context, keys dataloader.Keys) []*dataloader.Result {
+// 	// read all requested users in a single query
+// 	productIDs := make([]string, len(keys))
+// 	for ix, key := range keys {
+// 		productIDs[ix] = key.String()
+// 		log.Println(productIDs[ix])
+// 	}
+// 	products, err := dbmodels.Products(
+// 		qm.WhereIn("id=?", productIDs),
+// 	).All(ctx, boil.GetContextDB())
+
+// 	if err != nil {
+// 		return nil
+// 	}
+
+// 	// return User records into a map by ID
+// 	productById := map[string]*dbmodels.Product{}
+
+// 	for _, item := range products {
+// 		productId := strconv.Itoa(int(item.ID))
+// 		productById[productId] = item
+// 	}
+
+// 	// return users in the same order requested
+// 	output := make([]*dataloader.Result, len(keys))
+// 	for index, userKey := range keys {
+// 		product, ok := productById[userKey.String()]
+// 		if ok {
+// 			output[index] = &dataloader.Result{Data: product, Error: nil}
+// 		} else {
+// 			err := fmt.Errorf("user not found %s", userKey.String())
+// 			output[index] = &dataloader.Result{Data: nil, Error: err}
+// 		}
+// 	}
+// 	return output
+// }
+
+// // Loaders wrap your data loaders to inject via middleware
+// type Loaders struct {
+// 	ProductLoader *dataloader.Loader
+// }
+
+// // NewLoaders instantiates data loaders for the middleware
+// func NewLoaders(conn *sql.DB) *Loaders {
+// 	// define the data loader
+// 	productReader := boil.GetContextDB()
+// 	loaders := &Loaders{
+// 		ProductLoader: dataloader.NewBatchedLoader(productReader.),
+// 	}
+// 	return loaders
+// }
+//dataloader
 
 func GetAllProduct(ctx context.Context) ([]*entity.Product, error) {
 	var lstProductResult []*entity.Product
@@ -27,7 +95,27 @@ func GetAllProduct(ctx context.Context) ([]*entity.Product, error) {
 func GetProductByCode(ctx context.Context, code string) (*entity.Product, error) {
 	var productResult = entity.Product{}
 
-	err := dbmodels.Products(qm.Where("code=?", code)).Bind(ctx, boil.GetDB(), &productResult)
+	// err := dbmodels.Products(qm.WhereIn("code in ?", code)).Bind(ctx, boil.GetDB(), &productResult)
+	err := dbmodels.Products(qm.WhereIn("code in ?", code)).Bind(ctx, boil.GetContextDB(), &productResult)
+
+	if err != nil {
+		log.Fatal("Get account by code fail", err)
+	}
+
+	return &productResult, nil
+
+}
+
+func GetProductByID(ctx context.Context, id int) (*entity.Product, error) {
+
+	boil.DebugMode = true
+
+	// Optionally set the writer as well. Defaults to os.Stdout
+	fh, _ := os.Open("debug.txt")
+	boil.DebugWriter = fh
+	var productResult = entity.Product{}
+
+	err := dbmodels.Products(qm.WhereIn("id in ?", id)).Bind(ctx, boil.GetDB(), &productResult)
 
 	if err != nil {
 		log.Fatal("Get account by code fail", err)
@@ -91,4 +179,26 @@ func UpdateProduct(ctx context.Context, input input.UpdateProductModel) (*entity
 	}
 	return &productResult, nil
 
+}
+
+func DeleteProduct(ctx context.Context, id int) (*entity.Product, error) {
+	productDelete, err := dbmodels.FindProduct(ctx, boil.GetContextDB(), int64(id))
+	if err != nil {
+		log.Fatal("Cannot find product with ID: ", id, err)
+	}
+	rows, err := productDelete.Delete(ctx, boil.GetContextDB())
+
+	var productResult entity.Product
+	if rows > 0 {
+		productResult = entity.Product{
+			ID:          id,
+			Code:        productDelete.Code,
+			Name:        productDelete.Name,
+			Description: productDelete.Description,
+			Price:       productDelete.Price,
+			Category:    productDelete.Category,
+		}
+	}
+
+	return &productResult, nil
 }
