@@ -5,7 +5,6 @@ package services
 
 import (
 	"context"
-	"fmt"
 	"graphdemo/pkg/entity"
 	"graphdemo/pkg/graph/generated"
 	"graphdemo/pkg/graph/model"
@@ -35,7 +34,11 @@ func (r *mutationResolver) UpdateAccount(ctx context.Context, input model.Update
 
 // DeleteAccount is the resolver for the deleteAccount field.
 func (r *mutationResolver) DeleteAccount(ctx context.Context, id int) (*entity.Accounts, error) {
-	panic(fmt.Errorf("not implemented: DeleteAccount - deleteAccount"))
+	accountResult, err := repositories.DeleteAccount(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return accountResult, nil
 }
 
 // Order is the resolver for the order field.

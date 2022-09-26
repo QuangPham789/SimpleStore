@@ -81,3 +81,22 @@ func UpdateAccount(ctx context.Context, input input.UpdateAccountModel) (*entity
 	return &accountResult, nil
 
 }
+
+func DeleteAccount(ctx context.Context, id int) (*entity.Accounts, error) {
+	accountDelete, err := dbmodels.FindAccount(ctx, boil.GetContextDB(), int64(id))
+	if err != nil {
+		log.Fatal("Cannot find product with ID: ", id, err)
+	}
+	rows, err := accountDelete.Delete(ctx, boil.GetContextDB())
+
+	var accountResult entity.Accounts
+	if rows > 0 {
+		accountResult = entity.Accounts{
+			ID:       id,
+			Username: accountDelete.Username,
+			Password: int(accountDelete.Password),
+		}
+	}
+
+	return &accountResult, nil
+}
