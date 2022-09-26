@@ -26,7 +26,6 @@ type Order struct {
 	ID         int64     `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Code       string    `boil:"code" json:"code" toml:"code" yaml:"code"`
 	AccountID  int64     `boil:"account_id" json:"account_id" toml:"account_id" yaml:"account_id"`
-	Items      string    `boil:"items" json:"items,omitempty" toml:"items" yaml:"items,omitempty"`
 	TotalPrice int64     `boil:"total_price" json:"total_price" toml:"total_price" yaml:"total_price"`
 	CreatedAt  time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 
@@ -38,14 +37,12 @@ var OrderColumns = struct {
 	ID         string
 	Code       string
 	AccountID  string
-	Items      string
 	TotalPrice string
 	CreatedAt  string
 }{
 	ID:         "id",
 	Code:       "code",
 	AccountID:  "account_id",
-	Items:      "items",
 	TotalPrice: "total_price",
 	CreatedAt:  "created_at",
 }
@@ -54,52 +51,45 @@ var OrderTableColumns = struct {
 	ID         string
 	Code       string
 	AccountID  string
-	Items      string
 	TotalPrice string
 	CreatedAt  string
 }{
 	ID:         "order.id",
 	Code:       "order.code",
 	AccountID:  "order.account_id",
-	Items:      "order.items",
 	TotalPrice: "order.total_price",
 	CreatedAt:  "order.created_at",
 }
 
 // Generated where
 
-func (w whereHelperstring) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelperstring) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-
 var OrderWhere = struct {
 	ID         whereHelperint64
 	Code       whereHelperstring
 	AccountID  whereHelperint64
-	Items      whereHelperstring
 	TotalPrice whereHelperint64
 	CreatedAt  whereHelpertime_Time
 }{
 	ID:         whereHelperint64{field: "\"order\".\"id\""},
 	Code:       whereHelperstring{field: "\"order\".\"code\""},
 	AccountID:  whereHelperint64{field: "\"order\".\"account_id\""},
-	Items:      whereHelperstring{field: "\"order\".\"items\""},
 	TotalPrice: whereHelperint64{field: "\"order\".\"total_price\""},
 	CreatedAt:  whereHelpertime_Time{field: "\"order\".\"created_at\""},
 }
 
 // OrderRels is where relationship names are stored.
 var OrderRels = struct {
-	IDAccount string
-	ItemID string
+	Account string
+	Items   string
 }{
-	IDAccount: "IDAccount",
-	ItemID: "ItemID",
+	Account: "Account",
+	Items:   "Items",
 }
 
 // orderR is where relationships are stored.
 type orderR struct {
-	IDAccount *Account `boil:"IDAccount" json:"IDAccount" toml:"IDAccount" yaml:"IDAccount"`
-	ItemID *Item `boil:"ItemID" json:"ItemID" toml:"ItemID" yaml:"ItemID"`
+	Account *Account  `boil:"Account" json:"Account" toml:"Account" yaml:"Account"`
+	Items   ItemSlice `boil:"Items" json:"Items" toml:"Items" yaml:"Items"`
 }
 
 // NewStruct creates a new relationship struct
@@ -107,20 +97,27 @@ func (*orderR) NewStruct() *orderR {
 	return &orderR{}
 }
 
-func (r *orderR) GetIDAccount() *Account {
+func (r *orderR) GetAccount() *Account {
 	if r == nil {
 		return nil
 	}
-	return r.IDAccount
+	return r.Account
+}
+
+func (r *orderR) GetItems() ItemSlice {
+	if r == nil {
+		return nil
+	}
+	return r.Items
 }
 
 // orderL is where Load methods for each relationship are stored.
 type orderL struct{}
 
 var (
-	orderAllColumns            = []string{"id", "code", "account_id", "items", "total_price", "created_at"}
+	orderAllColumns            = []string{"id", "code", "account_id", "total_price", "created_at"}
 	orderColumnsWithoutDefault = []string{"code"}
-	orderColumnsWithDefault    = []string{"id", "account_id", "items", "total_price", "created_at"}
+	orderColumnsWithDefault    = []string{"id", "account_id", "total_price", "created_at"}
 	orderPrimaryKeyColumns     = []string{"id"}
 	orderGeneratedColumns      = []string{}
 )
@@ -423,10 +420,10 @@ func (q orderQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool
 	return count > 0, nil
 }
 
-// IDAccount pointed to by the foreign key.
-func (o *Order) IDAccount(mods ...qm.QueryMod) accountQuery {
+// Account pointed to by the foreign key.
+func (o *Order) Account(mods ...qm.QueryMod) accountQuery {
 	queryMods := []qm.QueryMod{
-		qm.Where("\"id\" = ?", o.ID),
+		qm.Where("\"id\" = ?", o.AccountID),
 	}
 
 	queryMods = append(queryMods, mods...)
@@ -434,9 +431,23 @@ func (o *Order) IDAccount(mods ...qm.QueryMod) accountQuery {
 	return Accounts(queryMods...)
 }
 
-// LoadIDAccount allows an eager lookup of values, cached into the
+// Items retrieves all the item's Items with an executor.
+func (o *Order) Items(mods ...qm.QueryMod) itemQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"item\".\"order_id\"=?", o.ID),
+	)
+
+	return Items(queryMods...)
+}
+
+// LoadAccount allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for an N-1 relationship.
-func (orderL) LoadIDAccount(ctx context.Context, e boil.ContextExecutor, singular bool, maybeOrder interface{}, mods queries.Applicator) error {
+func (orderL) LoadAccount(ctx context.Context, e boil.ContextExecutor, singular bool, maybeOrder interface{}, mods queries.Applicator) error {
 	var slice []*Order
 	var object *Order
 
@@ -467,7 +478,7 @@ func (orderL) LoadIDAccount(ctx context.Context, e boil.ContextExecutor, singula
 		if object.R == nil {
 			object.R = &orderR{}
 		}
-		args = append(args, object.ID)
+		args = append(args, object.AccountID)
 
 	} else {
 	Outer:
@@ -477,12 +488,12 @@ func (orderL) LoadIDAccount(ctx context.Context, e boil.ContextExecutor, singula
 			}
 
 			for _, a := range args {
-				if a == obj.ID {
+				if a == obj.AccountID {
 					continue Outer
 				}
 			}
 
-			args = append(args, obj.ID)
+			args = append(args, obj.AccountID)
 
 		}
 	}
@@ -530,22 +541,22 @@ func (orderL) LoadIDAccount(ctx context.Context, e boil.ContextExecutor, singula
 
 	if singular {
 		foreign := resultSlice[0]
-		object.R.IDAccount = foreign
+		object.R.Account = foreign
 		if foreign.R == nil {
 			foreign.R = &accountR{}
 		}
-		foreign.R.IDOrder = object
+		foreign.R.Orders = append(foreign.R.Orders, object)
 		return nil
 	}
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if local.ID == foreign.ID {
-				local.R.IDAccount = foreign
+			if local.AccountID == foreign.ID {
+				local.R.Account = foreign
 				if foreign.R == nil {
 					foreign.R = &accountR{}
 				}
-				foreign.R.IDOrder = local
+				foreign.R.Orders = append(foreign.R.Orders, local)
 				break
 			}
 		}
@@ -554,18 +565,132 @@ func (orderL) LoadIDAccount(ctx context.Context, e boil.ContextExecutor, singula
 	return nil
 }
 
-// SetIDAccountG of the order to the related item.
-// Sets o.R.IDAccount to related.
-// Adds o to related.R.IDOrder.
-// Uses the global database handle.
-func (o *Order) SetIDAccountG(ctx context.Context, insert bool, related *Account) error {
-	return o.SetIDAccount(ctx, boil.GetContextDB(), insert, related)
+// LoadItems allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (orderL) LoadItems(ctx context.Context, e boil.ContextExecutor, singular bool, maybeOrder interface{}, mods queries.Applicator) error {
+	var slice []*Order
+	var object *Order
+
+	if singular {
+		var ok bool
+		object, ok = maybeOrder.(*Order)
+		if !ok {
+			object = new(Order)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeOrder)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeOrder))
+			}
+		}
+	} else {
+		s, ok := maybeOrder.(*[]*Order)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeOrder)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeOrder))
+			}
+		}
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &orderR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &orderR{}
+			}
+
+			for _, a := range args {
+				if queries.Equal(a, obj.ID) {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`item`),
+		qm.WhereIn(`item.order_id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load item")
+	}
+
+	var resultSlice []*Item
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice item")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on item")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for item")
+	}
+
+	if len(itemAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.Items = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &itemR{}
+			}
+			foreign.R.Order = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if queries.Equal(local.ID, foreign.OrderID) {
+				local.R.Items = append(local.R.Items, foreign)
+				if foreign.R == nil {
+					foreign.R = &itemR{}
+				}
+				foreign.R.Order = local
+				break
+			}
+		}
+	}
+
+	return nil
 }
 
-// SetIDAccount of the order to the related item.
-// Sets o.R.IDAccount to related.
-// Adds o to related.R.IDOrder.
-func (o *Order) SetIDAccount(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Account) error {
+// SetAccountG of the order to the related item.
+// Sets o.R.Account to related.
+// Adds o to related.R.Orders.
+// Uses the global database handle.
+func (o *Order) SetAccountG(ctx context.Context, insert bool, related *Account) error {
+	return o.SetAccount(ctx, boil.GetContextDB(), insert, related)
+}
+
+// SetAccount of the order to the related item.
+// Sets o.R.Account to related.
+// Adds o to related.R.Orders.
+func (o *Order) SetAccount(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Account) error {
 	var err error
 	if insert {
 		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
@@ -575,7 +700,7 @@ func (o *Order) SetIDAccount(ctx context.Context, exec boil.ContextExecutor, ins
 
 	updateQuery := fmt.Sprintf(
 		"UPDATE \"order\" SET %s WHERE %s",
-		strmangle.SetParamNames("\"", "\"", 1, []string{"id"}),
+		strmangle.SetParamNames("\"", "\"", 1, []string{"account_id"}),
 		strmangle.WhereClause("\"", "\"", 2, orderPrimaryKeyColumns),
 	)
 	values := []interface{}{related.ID, o.ID}
@@ -589,21 +714,176 @@ func (o *Order) SetIDAccount(ctx context.Context, exec boil.ContextExecutor, ins
 		return errors.Wrap(err, "failed to update local table")
 	}
 
-	o.ID = related.ID
+	o.AccountID = related.ID
 	if o.R == nil {
 		o.R = &orderR{
-			IDAccount: related,
+			Account: related,
 		}
 	} else {
-		o.R.IDAccount = related
+		o.R.Account = related
 	}
 
 	if related.R == nil {
 		related.R = &accountR{
-			IDOrder: o,
+			Orders: OrderSlice{o},
 		}
 	} else {
-		related.R.IDOrder = o
+		related.R.Orders = append(related.R.Orders, o)
+	}
+
+	return nil
+}
+
+// AddItemsG adds the given related objects to the existing relationships
+// of the order, optionally inserting them as new records.
+// Appends related to o.R.Items.
+// Sets related.R.Order appropriately.
+// Uses the global database handle.
+func (o *Order) AddItemsG(ctx context.Context, insert bool, related ...*Item) error {
+	return o.AddItems(ctx, boil.GetContextDB(), insert, related...)
+}
+
+// AddItems adds the given related objects to the existing relationships
+// of the order, optionally inserting them as new records.
+// Appends related to o.R.Items.
+// Sets related.R.Order appropriately.
+func (o *Order) AddItems(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Item) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			queries.Assign(&rel.OrderID, o.ID)
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"item\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"order_id"}),
+				strmangle.WhereClause("\"", "\"", 2, itemPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			queries.Assign(&rel.OrderID, o.ID)
+		}
+	}
+
+	if o.R == nil {
+		o.R = &orderR{
+			Items: related,
+		}
+	} else {
+		o.R.Items = append(o.R.Items, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &itemR{
+				Order: o,
+			}
+		} else {
+			rel.R.Order = o
+		}
+	}
+	return nil
+}
+
+// SetItemsG removes all previously related items of the
+// order replacing them completely with the passed
+// in related items, optionally inserting them as new records.
+// Sets o.R.Order's Items accordingly.
+// Replaces o.R.Items with related.
+// Sets related.R.Order's Items accordingly.
+// Uses the global database handle.
+func (o *Order) SetItemsG(ctx context.Context, insert bool, related ...*Item) error {
+	return o.SetItems(ctx, boil.GetContextDB(), insert, related...)
+}
+
+// SetItems removes all previously related items of the
+// order replacing them completely with the passed
+// in related items, optionally inserting them as new records.
+// Sets o.R.Order's Items accordingly.
+// Replaces o.R.Items with related.
+// Sets related.R.Order's Items accordingly.
+func (o *Order) SetItems(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Item) error {
+	query := "update \"item\" set \"order_id\" = null where \"order_id\" = $1"
+	values := []interface{}{o.ID}
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, query)
+		fmt.Fprintln(writer, values)
+	}
+	_, err := exec.ExecContext(ctx, query, values...)
+	if err != nil {
+		return errors.Wrap(err, "failed to remove relationships before set")
+	}
+
+	if o.R != nil {
+		for _, rel := range o.R.Items {
+			queries.SetScanner(&rel.OrderID, nil)
+			if rel.R == nil {
+				continue
+			}
+
+			rel.R.Order = nil
+		}
+		o.R.Items = nil
+	}
+
+	return o.AddItems(ctx, exec, insert, related...)
+}
+
+// RemoveItemsG relationships from objects passed in.
+// Removes related items from R.Items (uses pointer comparison, removal does not keep order)
+// Sets related.R.Order.
+// Uses the global database handle.
+func (o *Order) RemoveItemsG(ctx context.Context, related ...*Item) error {
+	return o.RemoveItems(ctx, boil.GetContextDB(), related...)
+}
+
+// RemoveItems relationships from objects passed in.
+// Removes related items from R.Items (uses pointer comparison, removal does not keep order)
+// Sets related.R.Order.
+func (o *Order) RemoveItems(ctx context.Context, exec boil.ContextExecutor, related ...*Item) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	for _, rel := range related {
+		queries.SetScanner(&rel.OrderID, nil)
+		if rel.R != nil {
+			rel.R.Order = nil
+		}
+		if _, err = rel.Update(ctx, exec, boil.Whitelist("order_id")); err != nil {
+			return err
+		}
+	}
+	if o.R == nil {
+		return nil
+	}
+
+	for _, rel := range related {
+		for i, ri := range o.R.Items {
+			if rel != ri {
+				continue
+			}
+
+			ln := len(o.R.Items)
+			if ln > 1 && i < ln-1 {
+				o.R.Items[i] = o.R.Items[ln-1]
+			}
+			o.R.Items = o.R.Items[:ln-1]
+			break
+		}
 	}
 
 	return nil

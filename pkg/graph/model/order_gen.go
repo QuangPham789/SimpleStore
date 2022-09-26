@@ -3,7 +3,6 @@
 package model
 
 
-
 type NewOrder struct {
 	Accountid int          `json:"accountid"`
 	Items     []*ItemModel `json:"items"`
@@ -11,9 +10,10 @@ type NewOrder struct {
 }
 
 
+
+
 type UpdateOrderModel struct {
 	ID    int          `json:"id"`
 	Items []*ItemModel `json:"items"`
 	Total int          `json:"total"`
 }
-

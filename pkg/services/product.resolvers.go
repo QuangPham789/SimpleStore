@@ -37,8 +37,8 @@ func (r *mutationResolver) DeleteProduct(ctx context.Context, id int) (*entity.P
 	return productResult, nil
 }
 
-// GetAllProduct is the resolver for the GetAllProduct field.
-func (r *queryResolver) GetAllProduct(ctx context.Context) ([]*entity.Product, error) {
+// Products is the resolver for the Products field.
+func (r *queryResolver) Products(ctx context.Context) ([]*entity.Product, error) {
 	productFromDB, err := repositories.GetAllProduct(ctx)
 	if err != nil {
 		return nil, err
@@ -47,8 +47,8 @@ func (r *queryResolver) GetAllProduct(ctx context.Context) ([]*entity.Product, e
 	return productFromDB, nil
 }
 
-// GetProductByCode is the resolver for the GetProductByCode field.
-func (r *queryResolver) GetProductByCode(ctx context.Context, code string) (*entity.Product, error) {
+// ProductByCode is the resolver for the ProductByCode field.
+func (r *queryResolver) ProductByCode(ctx context.Context, code string) (*entity.Product, error) {
 	productFromDB, err := repositories.GetProductByCode(ctx, code)
 	if err != nil {
 		return nil, err

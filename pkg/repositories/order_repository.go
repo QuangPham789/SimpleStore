@@ -2,13 +2,15 @@ package repositories
 
 import (
 	"context"
+	"log"
+
 	// "graphdemo/pkg/dataloader"
+
 	dbmodels "graphdemo/pkg/db/models"
 	"graphdemo/pkg/entity"
-	"log"
-	"strconv"
 
 	"github.com/volatiletech/sqlboiler/v4/boil"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 // func GetItemsInOrderID(ctx context.Context, code int64) ([]*entity.Item, error) {
@@ -25,37 +27,45 @@ import (
 // 	return itemResult, nil
 
 // }
-
-func GetAllOrder(ctx context.Context) ([]*entity.Order, error) {
-	var lstOrderResult []*entity.Order
-
-	var lstItem []*entity.Item
-	lstOderFormDB, err := dbmodels.Orders().All(ctx, boil.GetContextDB())
+func GetOrderByID(ctx context.Context, ids []int) ([]*entity.Order, error) {
+	var orderResult []*entity.Order
+	convertedIDs := make([]interface{}, len(ids))
+	for index, num := range ids {
+		convertedIDs[index] = num
+	}
+	err := dbmodels.Orders(qm.WhereIn("id IN ?", convertedIDs...)).Bind(ctx, boil.GetDB(), &orderResult)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Get item by id fail", err)
 	}
 
-	log.Println(len(lstOderFormDB))
+	return orderResult, nil
+}
+func GetAllOrder(ctx context.Context) ([]*entity.Order, error) {
+	var lstOrderResult []*entity.Order
+	// err := dbmodels.NewQuery(
+	// 	qm.Select("order.id as id", "order.code as code", "order.total_price as totalprice"),
+	// 	qm.From(dbmodels.TableNames.Order),
+	// ).Bind(ctx, boil.GetDB(), &lstOrderResult)
 
-	for _, itemOrder := range lstOderFormDB {
-		log.Println(itemOrder.Items)
-		// parse to str
-		itemId, _ := strconv.ParseInt(itemOrder.Items, 10, 0)
-		item, err := GetItemLoader(ctx).Load(itemOrder.Items)
-		if err != nil {
-			log.Fatal(err)
-		}
-		lstItem = append(lstItem, item)
-		itemOrder := entity.Order{
-			ID:        strconv.Itoa(int(itemOrder.ID)),
-			Accountid: int(itemOrder.AccountID),
-			Total:     int(itemOrder.TotalPrice),
-			Itemid:    int(itemId),
-			Items:     lstItem,
-		}
-		lstOrderResult = append(lstOrderResult, &itemOrder)
+	// if err != nil {
+	// 	log.Fatal("Get all orders fail: ", err)
+	// }
+
+	ordersFromDB, err := dbmodels.Orders().All(ctx, boil.GetContextDB())
+
+	if err != nil {
+		log.Fatal("Get all orders fail: ", err)
 	}
 
+	for _, o := range ordersFromDB {
+		orderItem := entity.Order{
+			ID:         int(o.ID),
+			Code:       o.Code,
+			Accountid:  int(o.AccountID),
+			TotalPrice: int(o.TotalPrice),
+		}
+		lstOrderResult = append(lstOrderResult, &orderItem)
+	}
 	return lstOrderResult, nil
 }

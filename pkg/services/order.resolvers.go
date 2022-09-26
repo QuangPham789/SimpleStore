@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"graphdemo/pkg/entity"
+	"graphdemo/pkg/graph/generated"
 	"graphdemo/pkg/graph/model"
 	"graphdemo/pkg/repositories"
 )
@@ -26,17 +27,22 @@ func (r *mutationResolver) DeleteOrder(ctx context.Context, id int) (*entity.Ord
 	panic(fmt.Errorf("not implemented: DeleteOrder - deleteOrder"))
 }
 
-// GetAllOrder is the resolver for the GetAllOrder field.
-func (r *queryResolver) GetAllOrder(ctx context.Context) ([]*entity.Order, error) {
-	orderFromDB, err := repositories.GetAllOrder(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return orderFromDB, nil
+// Order is the resolver for the order field.
+func (r *orderResolver) Order(ctx context.Context, obj *entity.Order) (*entity.Order, error) {
+	return repositories.For(ctx).OrderLoader.Load(obj.ID)
 }
 
-// GetOrderByAccountID is the resolver for the GetOrderByAccountId field.
-func (r *queryResolver) GetOrderByAccountID(ctx context.Context) (*entity.Order, error) {
-	panic(fmt.Errorf("not implemented: GetOrderByAccountID - GetOrderByAccountId"))
+// Orders is the resolver for the Orders field.
+func (r *queryResolver) Orders(ctx context.Context) ([]*entity.Order, error) {
+	panic(fmt.Errorf("not implemented: Orders - Orders"))
 }
+
+// OrderByAccountID is the resolver for the OrderByAccountId field.
+func (r *queryResolver) OrderByAccountID(ctx context.Context) (*entity.Order, error) {
+	panic(fmt.Errorf("not implemented: OrderByAccountID - OrderByAccountId"))
+}
+
+// Order returns generated.OrderResolver implementation.
+func (r *Resolver) Order() generated.OrderResolver { return &orderResolver{r} }
+
+type orderResolver struct{ *Resolver }

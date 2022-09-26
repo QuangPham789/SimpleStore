@@ -7,11 +7,10 @@ type NewOrder struct {
 }
 
 type Order struct {
-	ID        string  `json:"id"`
-	Accountid int     `json:"accountid"`
-	Items     []*Item `json:"items"`
-	Itemid    int     `json:"itemid"`
-	Total     int     `json:"total"`
+	ID         int    `json:"id"`
+	Code       string `json:"code"`
+	Accountid  int    `json:"accountid"`
+	TotalPrice int    `json:"totalprice"`
 }
 
 type UpdateOrderModel struct {

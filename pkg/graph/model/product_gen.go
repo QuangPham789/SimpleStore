@@ -10,6 +10,7 @@ type NewProduct struct {
 	Category    string `json:"category"`
 }
 
+
 type UpdateProductModel struct {
 	ID          int    `json:"id"`
 	Code        string `json:"code"`

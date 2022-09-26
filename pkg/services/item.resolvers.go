@@ -72,8 +72,8 @@ func (r *mutationResolver) DeleteItem(ctx context.Context, id int) (*entity.Item
 	panic(fmt.Errorf("not implemented: DeleteItem - deleteItem"))
 }
 
-// GetAllItem is the resolver for the GetAllItem field.
-func (r *queryResolver) GetAllItem(ctx context.Context) ([]*entity.Item, error) {
+// Items is the resolver for the Items field.
+func (r *queryResolver) Items(ctx context.Context) ([]*entity.Item, error) {
 	itemFromDB, err := repositories.GetAllItem(ctx)
 	if err != nil {
 		return nil, err
@@ -82,9 +82,9 @@ func (r *queryResolver) GetAllItem(ctx context.Context) ([]*entity.Item, error) 
 	return itemFromDB, nil
 }
 
-// GetItemByOrderID is the resolver for the GetItemByOrderID field.
-func (r *queryResolver) GetItemByOrderID(ctx context.Context, id int) ([]*entity.Item, error) {
-	panic(fmt.Errorf("not implemented: GetItemByOrderID - GetItemByOrderID"))
+// ItemByOrderID is the resolver for the ItemByOrderID field.
+func (r *queryResolver) ItemByOrderID(ctx context.Context, id int) ([]*entity.Item, error) {
+	panic(fmt.Errorf("not implemented: ItemByOrderID - ItemByOrderID"))
 }
 
 type itemModelResolver struct{ *Resolver }

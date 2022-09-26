@@ -10,6 +10,7 @@ import (
 	"graphdemo/pkg/graph/generated"
 	"graphdemo/pkg/graph/model"
 	"graphdemo/pkg/repositories"
+	"log"
 
 	_ "github.com/lib/pq"
 )
@@ -37,28 +38,45 @@ func (r *mutationResolver) DeleteAccount(ctx context.Context, id int) (*entity.A
 	panic(fmt.Errorf("not implemented: DeleteAccount - deleteAccount"))
 }
 
-// GetAllAccounts is the resolver for the GetAllAccounts field.
-func (r *queryResolver) GetAllAccounts(ctx context.Context) ([]*entity.Accounts, error) {
+// Order is the resolver for the order field.
+func (r *accountsResolver) Order(ctx context.Context, obj *entity.Accounts) ([]*entity.Order, error) {
+	var m []*entity.Order
+
+	lstOrder, err := repositories.GetAllOrder(ctx)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, o := range lstOrder {
+		if o.Accountid == obj.ID {
+			m = append(m, o)
+		}
+	}
+
+	return m, nil
+}
+
+// Accounts returns generated.AccountsResolver implementation.
+func (r *Resolver) Accounts() generated.AccountsResolver { return &accountsResolver{r} }
+
+// Accounts is the resolver for the Accounts field.
+func (r *queryResolver) Accounts(ctx context.Context) ([]*entity.Accounts, error) {
 	accountsFromDB, err := repositories.GetAllAccounts(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	return accountsFromDB, nil
-
-	// return dataloader.GetAccountLoader(ctx).Load(input)
 }
 
-// GetAccountByID is the resolver for the GetAccountByID field.
-func (r *queryResolver) GetAccountByID(ctx context.Context, id int) (*entity.Accounts, error) {
-	// accountsFromDB, err := repositories.GetAccountByID(ctx, int64(id))
-	// if err != nil {
-	// 	return nil, err
-	// }
+// AccountByID is the resolver for the AccountByID field.
+func (r *queryResolver) AccountByID(ctx context.Context, id int) (*entity.Accounts, error) {
+	accountsFromDB, err := repositories.GetAccountByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
 
-	// return accountsFromDB, nil
-	// return repositories.GetAccountLoader(ctx).Load(id)
-	panic(fmt.Errorf("not implemented: DeleteAccount - deleteAccount"))
+	return accountsFromDB, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
@@ -69,3 +87,4 @@ func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+type accountsResolver struct{ *Resolver }

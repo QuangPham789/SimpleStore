@@ -139,14 +139,14 @@ var AccountWhere = struct {
 
 // AccountRels is where relationship names are stored.
 var AccountRels = struct {
-	IDOrder string
+	Orders string
 }{
-	IDOrder: "IDOrder",
+	Orders: "Orders",
 }
 
 // accountR is where relationships are stored.
 type accountR struct {
-	IDOrder *Order `boil:"IDOrder" json:"IDOrder" toml:"IDOrder" yaml:"IDOrder"`
+	Orders OrderSlice `boil:"Orders" json:"Orders" toml:"Orders" yaml:"Orders"`
 }
 
 // NewStruct creates a new relationship struct
@@ -154,11 +154,11 @@ func (*accountR) NewStruct() *accountR {
 	return &accountR{}
 }
 
-func (r *accountR) GetIDOrder() *Order {
+func (r *accountR) GetOrders() OrderSlice {
 	if r == nil {
 		return nil
 	}
-	return r.IDOrder
+	return r.Orders
 }
 
 // accountL is where Load methods for each relationship are stored.
@@ -470,20 +470,23 @@ func (q accountQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bo
 	return count > 0, nil
 }
 
-// IDOrder pointed to by the foreign key.
-func (o *Account) IDOrder(mods ...qm.QueryMod) orderQuery {
-	queryMods := []qm.QueryMod{
-		qm.Where("\"id\" = ?", o.ID),
+// Orders retrieves all the order's Orders with an executor.
+func (o *Account) Orders(mods ...qm.QueryMod) orderQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
 	}
 
-	queryMods = append(queryMods, mods...)
+	queryMods = append(queryMods,
+		qm.Where("\"order\".\"account_id\"=?", o.ID),
+	)
 
 	return Orders(queryMods...)
 }
 
-// LoadIDOrder allows an eager lookup of values, cached into the
-// loaded structs of the objects. This is for a 1-1 relationship.
-func (accountL) LoadIDOrder(ctx context.Context, e boil.ContextExecutor, singular bool, maybeAccount interface{}, mods queries.Applicator) error {
+// LoadOrders allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (accountL) LoadOrders(ctx context.Context, e boil.ContextExecutor, singular bool, maybeAccount interface{}, mods queries.Applicator) error {
 	var slice []*Account
 	var object *Account
 
@@ -538,7 +541,7 @@ func (accountL) LoadIDOrder(ctx context.Context, e boil.ContextExecutor, singula
 
 	query := NewQuery(
 		qm.From(`order`),
-		qm.WhereIn(`order.id in ?`, args...),
+		qm.WhereIn(`order.account_id in ?`, args...),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -546,50 +549,47 @@ func (accountL) LoadIDOrder(ctx context.Context, e boil.ContextExecutor, singula
 
 	results, err := query.QueryContext(ctx, e)
 	if err != nil {
-		return errors.Wrap(err, "failed to eager load Order")
+		return errors.Wrap(err, "failed to eager load order")
 	}
 
 	var resultSlice []*Order
 	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice Order")
+		return errors.Wrap(err, "failed to bind eager loaded slice order")
 	}
 
 	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results of eager load for order")
+		return errors.Wrap(err, "failed to close results in eager load on order")
 	}
 	if err = results.Err(); err != nil {
 		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for order")
 	}
 
-	if len(accountAfterSelectHooks) != 0 {
+	if len(orderAfterSelectHooks) != 0 {
 		for _, obj := range resultSlice {
 			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
 				return err
 			}
 		}
 	}
-
-	if len(resultSlice) == 0 {
+	if singular {
+		object.R.Orders = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &orderR{}
+			}
+			foreign.R.Account = object
+		}
 		return nil
 	}
 
-	if singular {
-		foreign := resultSlice[0]
-		object.R.IDOrder = foreign
-		if foreign.R == nil {
-			foreign.R = &orderR{}
-		}
-		foreign.R.IDAccount = object
-	}
-
-	for _, local := range slice {
-		for _, foreign := range resultSlice {
-			if local.ID == foreign.ID {
-				local.R.IDOrder = foreign
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if local.ID == foreign.AccountID {
+				local.R.Orders = append(local.R.Orders, foreign)
 				if foreign.R == nil {
 					foreign.R = &orderR{}
 				}
-				foreign.R.IDAccount = local
+				foreign.R.Account = local
 				break
 			}
 		}
@@ -598,60 +598,64 @@ func (accountL) LoadIDOrder(ctx context.Context, e boil.ContextExecutor, singula
 	return nil
 }
 
-// SetIDOrderG of the account to the related item.
-// Sets o.R.IDOrder to related.
-// Adds o to related.R.IDAccount.
+// AddOrdersG adds the given related objects to the existing relationships
+// of the account, optionally inserting them as new records.
+// Appends related to o.R.Orders.
+// Sets related.R.Account appropriately.
 // Uses the global database handle.
-func (o *Account) SetIDOrderG(ctx context.Context, insert bool, related *Order) error {
-	return o.SetIDOrder(ctx, boil.GetContextDB(), insert, related)
+func (o *Account) AddOrdersG(ctx context.Context, insert bool, related ...*Order) error {
+	return o.AddOrders(ctx, boil.GetContextDB(), insert, related...)
 }
 
-// SetIDOrder of the account to the related item.
-// Sets o.R.IDOrder to related.
-// Adds o to related.R.IDAccount.
-func (o *Account) SetIDOrder(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Order) error {
+// AddOrders adds the given related objects to the existing relationships
+// of the account, optionally inserting them as new records.
+// Appends related to o.R.Orders.
+// Sets related.R.Account appropriately.
+func (o *Account) AddOrders(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Order) error {
 	var err error
+	for _, rel := range related {
+		if insert {
+			rel.AccountID = o.ID
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"order\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"account_id"}),
+				strmangle.WhereClause("\"", "\"", 2, orderPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
 
-	if insert {
-		related.ID = o.ID
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
 
-		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
-			return errors.Wrap(err, "failed to insert into foreign table")
+			rel.AccountID = o.ID
 		}
-	} else {
-		updateQuery := fmt.Sprintf(
-			"UPDATE \"order\" SET %s WHERE %s",
-			strmangle.SetParamNames("\"", "\"", 1, []string{"id"}),
-			strmangle.WhereClause("\"", "\"", 2, orderPrimaryKeyColumns),
-		)
-		values := []interface{}{o.ID, related.ID}
-
-		if boil.IsDebug(ctx) {
-			writer := boil.DebugWriterFrom(ctx)
-			fmt.Fprintln(writer, updateQuery)
-			fmt.Fprintln(writer, values)
-		}
-		if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
-			return errors.Wrap(err, "failed to update foreign table")
-		}
-
-		related.ID = o.ID
 	}
 
 	if o.R == nil {
 		o.R = &accountR{
-			IDOrder: related,
+			Orders: related,
 		}
 	} else {
-		o.R.IDOrder = related
+		o.R.Orders = append(o.R.Orders, related...)
 	}
 
-	if related.R == nil {
-		related.R = &orderR{
-			IDAccount: o,
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &orderR{
+				Account: o,
+			}
+		} else {
+			rel.R.Account = o
 		}
-	} else {
-		related.R.IDAccount = o
 	}
 	return nil
 }

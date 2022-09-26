@@ -14,12 +14,6 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
-type ctxKey string
-
-const (
-	loadersKey = ctxKey("dataloaders")
-)
-
 // UserReader reads Users from a database
 // type ProductReader struct {
 // 	conn *sql.DB

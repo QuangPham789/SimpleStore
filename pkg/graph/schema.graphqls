@@ -4,13 +4,14 @@
 #
 
 type Accounts {
-  id: ID!
+  id: Int!
   username: String!
   password: Int!
+  order: [Order!]!
 }
 
 type Product {
-	id:          ID!
+	id:          Int!
 	code:        String!
 	name:        String!
 	description: String!
@@ -18,33 +19,34 @@ type Product {
 }
 
 type Item {
-	id:         ID!
+	id:         Int!
 	code:       String!
   productid:  Int!
 	unit:       Int!
 	price:      String!      
 	total:      String!      
+  order: Order!
 }
 
 type Order {
-	id:         ID!
-  accountid: Int! 
-  itemid: Int!     
+	id:         Int!
+  # itemid: Int!     
 	items: [Item!]           
-	total: Int!            
+	total: Int!     
+  account: Account!       
 }
 
 
 type Query {
-  GetAllAccounts: [Accounts!]!
-  GetAccountByID(id: Int!): Accounts!
-  GetAllProduct: [Product!]!
-  GetProductByCode(code: String!): Product!
+  Accounts: [Accounts!]!
+  AccountByID(id: Int!): Accounts!
+  Products: [Product!]!
+  ProductByCode(code: String!): Product!
 
-  GetAllItem: [Item!]
-  GetItemByOrderID(id: Int!):[Item!]
-  GetAllOrder: [Order!]
-  GetOrderByAccountId: Order!
+  Items: [Item!]
+  ItemByOrderID(id: Int!):[Item!]
+  Orders: [Order!]
+  OrderByAccountId: Order!
 
 }
 
@@ -84,7 +86,7 @@ input NewItem{
 	total:      String!      
 }
 
-input ItemModel{
+input Item{
   id: Int!
   code:       String!
   productid:  Int!
@@ -95,13 +97,13 @@ input ItemModel{
 
 input NewOrder{
   accountid: Int!     
-	items: [ItemModel!]           
+	items: [Item!]           
 	total: Int!       
 }
 
 input UpdateOrderModel{
   id: Int!  
-	items: [ItemModel!]           
+	items: [Item!]           
 	total: Int!         
 }
 
@@ -113,7 +115,7 @@ type Mutation {
   updateProduct(input: UpdateProductModel!): Product!
   deleteProduct(id: Int!): Product!
   createItem(input: NewItem!) : Item!
-  updateItem(input: ItemModel!) : Item!
+  updateItem(input: Item!) : Item!
   deleteItem(id: Int!): Item!
   createOrder(input: NewOrder!) : Order!
   updateOrder(input: UpdateOrderModel!) : Order!
