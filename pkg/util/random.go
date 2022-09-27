@@ -48,3 +48,15 @@ func RandomProductPrice() int64 {
 func RandomProductCode() string {
 	return RandomString(4)
 }
+
+// func HashPassword(password string) (string, error) {
+// 	bytePassword := []byte(password)
+
+// 	passwordHash, err := bcrypt.GenerateFromPassword(bytePassword, bcrypt.DefaultCost)
+
+// 	if err != nil {
+// 		return "", err
+// 	}
+
+// 	return string(passwordHash), nil
+// }

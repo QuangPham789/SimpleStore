@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"fmt"
 	dbmodels "graphdemo/pkg/db/models"
 	entity "graphdemo/pkg/entity"
 	input "graphdemo/pkg/graph/model"
@@ -25,19 +26,24 @@ func GetAllAccounts(ctx context.Context) ([]*entity.Accounts, error) {
 }
 
 func GetAccountByID(ctx context.Context, id int) (*entity.Accounts, error) {
-	var accountResult = entity.Accounts{}
+	// var accountResult = entity.Accounts{}
 
-	err := dbmodels.Accounts(qm.Where("id=?", id)).Bind(ctx, boil.GetDB(), &accountResult)
+	// err := dbmodels.Accounts(qm.Where("id=?", id)).Bind(ctx, boil.GetDB(), &accountResult)
 
-	if err != nil {
-		log.Fatal("Get account by ID fail", err)
-	}
+	// if err != nil {
+	// 	log.Fatal("Get account by ID fail", err)
+	// }
 
-	return &accountResult, nil
+	// return &accountResult, nil
+	return GetAccountByField("id", id, ctx)
 
 }
 
 func CreateAccount(ctx context.Context, input input.NewAccount) (*entity.Accounts, error) {
+	// passwordHash, err := util.HashPassword(input.Password)
+	// if err != nil {
+	// 	log.Fatal("Hash password account fail", err)
+	// }
 	var account = dbmodels.Account{
 		Username: input.Username,
 		Password: int64(input.Password),
@@ -48,10 +54,13 @@ func CreateAccount(ctx context.Context, input input.NewAccount) (*entity.Account
 		log.Fatal("Insert account fail", err)
 	}
 
+	// token, err := GenToken()
 	accountResult := entity.Accounts{
 		ID:       int(account.ID),
 		Username: account.Username,
 		Password: int(account.Password),
+		// Token:     token.AccessToken,
+		// ExpiredAt: token.ExpiredAt.String(),
 	}
 
 	return &accountResult, nil
@@ -75,7 +84,7 @@ func UpdateAccount(ctx context.Context, input input.UpdateAccountModel) (*entity
 	if rows > 0 {
 		accountResult = entity.Accounts{
 			Username: accountUpdate.Username,
-			Password: int(accountUpdate.Password),
+			// Password: accountUpdate.Password,
 		}
 	}
 	return &accountResult, nil
@@ -94,9 +103,17 @@ func DeleteAccount(ctx context.Context, id int) (*entity.Accounts, error) {
 		accountResult = entity.Accounts{
 			ID:       id,
 			Username: accountDelete.Username,
-			Password: int(accountDelete.Password),
+			// Password: accountDelete.Password,
 		}
 	}
 
 	return &accountResult, nil
+}
+
+func GetAccountByField(field string, value int, ctx context.Context) (*entity.Accounts, error) {
+	var accountResult = entity.Accounts{}
+
+	err := dbmodels.Accounts(qm.Where(fmt.Sprintf("%v = ?", field), value)).Bind(ctx, boil.GetDB(), &accountResult)
+
+	return &accountResult, err
 }
