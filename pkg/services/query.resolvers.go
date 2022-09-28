@@ -6,6 +6,7 @@ import (
 	"graphdemo/pkg/entity"
 	"graphdemo/pkg/graph/generated"
 	"graphdemo/pkg/repositories"
+	"sync"
 )
 
 // account
@@ -21,11 +22,38 @@ func (r *queryResolver) Accounts(ctx context.Context) ([]*entity.Accounts, error
 
 // AccountByID is the resolver for the AccountByID field.
 func (r *queryResolver) AccountByID(ctx context.Context, id int) (*entity.Accounts, error) {
-	accountsFromDB, err := repositories.GetAccountByID(ctx, id)
-	if err != nil {
-		return nil, err
+	// accountsFromDB, err := repositories.GetAccountByID(ctx, id)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// return accountsFromDB, nil
+	workers := 3
+	total := 5
+	jobs := make(chan int)
+	results := make(chan *entity.Accounts)
+	wg := &sync.WaitGroup{}
+	// start workers
+	for w := 0; w < workers; w++ {
+		wg.Add(1)
+		go repositories.Worker(jobs, results, ctx, id, wg)
 	}
 
+	// insert jobs in background
+	go func() {
+		for j := 0; j < total; j++ {
+			jobs <- j
+		}
+		close(jobs)
+		wg.Wait()
+		// all workers are done so no more results
+		close(results)
+	}()
+	var accountsFromDB *entity.Accounts
+	// collect results
+	for i := 0; i < total; i++ {
+		accountsFromDB = <-results
+	}
 	return accountsFromDB, nil
 }
 

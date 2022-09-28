@@ -7,10 +7,23 @@ import (
 	entity "graphdemo/pkg/entity"
 	input "graphdemo/pkg/graph/model"
 	"log"
+	"sync"
 
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
+
+func Worker(jobs <-chan int, results chan<- *entity.Accounts, ctx context.Context, id int, wg *sync.WaitGroup) {
+	for _ = range jobs {
+		account, err := GetAccountByID(ctx, id)
+		if err != nil {
+			log.Println(err)
+
+		}
+		results <- account
+	}
+	wg.Done()
+}
 
 func GetAllAccounts(ctx context.Context) ([]*entity.Accounts, error) {
 	var lstAccountResult []*entity.Accounts

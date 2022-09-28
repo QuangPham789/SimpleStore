@@ -99,7 +99,11 @@ func (r *mutationResolver) DeleteItem(ctx context.Context, id int) (*entity.Item
 
 // CreateOrder is the resolver for the createOrder field.
 func (r *mutationResolver) CreateOrder(ctx context.Context, input model.NewOrder) (*entity.Order, error) {
-	panic(fmt.Errorf("not implemented: CreateOrder - createOrder"))
+	orderResult, err := repositories.CreateOrder(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+	return orderResult, nil
 }
 
 // UpdateOrder is the resolver for the updateOrder field.

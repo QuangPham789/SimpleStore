@@ -8,6 +8,7 @@ import (
 
 	dbmodels "graphdemo/pkg/db/models"
 	"graphdemo/pkg/entity"
+	input "graphdemo/pkg/graph/model"
 
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -68,4 +69,24 @@ func GetAllOrder(ctx context.Context) ([]*entity.Order, error) {
 		lstOrderResult = append(lstOrderResult, &orderItem)
 	}
 	return lstOrderResult, nil
+}
+
+func CreateOrder(ctx context.Context, input input.NewOrder) (*entity.Order, error) {
+	var order = dbmodels.Order{
+		AccountID:  int64(input.Accountid),
+		TotalPrice: int64(input.Total),
+	}
+
+	err := order.Insert(context.Background(), boil.GetContextDB(), boil.Infer())
+	if err != nil {
+		log.Println("Insert order fail", err)
+	}
+
+	orderResult := entity.Order{
+		Accountid:  int(order.AccountID),
+		TotalPrice: int(order.TotalPrice),
+	}
+
+	return &orderResult, nil
+
 }
